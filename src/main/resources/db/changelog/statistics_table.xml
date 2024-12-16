@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro
+        http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+
+    <!-- Create statistics_meta table -->
+    <changeSet id="1-create-statistics-meta-table" author="developer">
+        <createTable tableName="statistics_meta">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="symbol" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mic_code" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_timezone" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Create statistics_data table -->
+    <changeSet id="2-create-statistics-data-table" author="developer">
+        <createTable tableName="statistics_data">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="symbol" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Add foreign key constraint between statistics_data.symbol and statistics_meta.symbol -->
+    <changeSet id="3-add-foreign-key" author="developer">
+        <addForeignKeyConstraint
+            constraintName="fk_statistics_data_to_meta"
+            baseTableName="statistics_data"
+            baseColumnNames="symbol"
+            referencedTableName="statistics_meta"
+            referencedColumnNames="symbol"
+            onDelete="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- ChangeSet to create stock_profile table -->
+    <changeSet id="1-create-stock-profile-table" author="developer">
+        <createTable tableName="stock_profile">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="symbol" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mic_code" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sector" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="industry" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="employees" type="INT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="website" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ceo" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="address" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="address2" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="city" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="zip" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="state" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="country" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="phone" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
