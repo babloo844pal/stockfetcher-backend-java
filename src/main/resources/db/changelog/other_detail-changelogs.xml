@@ -1,0 +1,61 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+        
+
+    
+    <changeSet id="1" author="developer">
+        <createTable tableName="stock_data">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="symbol" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="volume" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timestamp" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="DECIMAL(10, 2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    
+    
+    <changeSet id="2" author="developer">
+        <createTable tableName="historical_data">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="symbol" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timestamp" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="open" type="DECIMAL(10, 2)"/>
+            <column name="high" type="DECIMAL(10, 2)"/>
+            <column name="low" type="DECIMAL(10, 2)"/>
+            <column name="close" type="DECIMAL(10, 2)"/>
+            <column name="volume" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="developer">
+        <createTable tableName="metadata">
+            <column name="symbol" type="VARCHAR(20)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="company_name" type="VARCHAR(100)"/>
+            <column name="sector" type="VARCHAR(50)"/>
+            <column name="market_cap" type="BIGINT"/>
+            <column name="currency" type="VARCHAR(10)"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- ChangeSet to create stock_meta table -->
+    <changeSet id="1-create-stock-meta" author="developer">
+        <createTable tableName="stock_meta">
+            <column name="symbol" type="VARCHAR(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="interval_slice" type="VARCHAR(255)">
+               <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="currency" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_timezone" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mic_code" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- ChangeSet to create stock_price table -->
+    <changeSet id="2-create-stock-price" author="developer">
+        <createTable tableName="stock_price">
+            <column name="symbol" type="VARCHAR(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="interval_slice" type="VARCHAR(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="datetime" type="TIMESTAMP">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="open" type="DECIMAL(38, 2)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="high" type="DECIMAL(38, 2)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="low" type="DECIMAL(38, 2)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="close" type="DECIMAL(38, 2)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="volume" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
