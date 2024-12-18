@@ -1,0 +1,24 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-recommendations-table-1" author="developer">
+        <createTable tableName="recommendations">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="symbol" type="VARCHAR(50)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="currency" type="VARCHAR(50)"/>
+            <column name="exchange" type="VARCHAR(50)"/>
+            <column name="mic_code" type="VARCHAR(50)"/>
+            <column name="exchange_timezone" type="VARCHAR(50)"/>
+            <column name="type" type="VARCHAR(50)"/>
+            <column name="trends" type="TEXT"/> <!-- Store trends as JSON in TEXT format -->
+            <column name="rating" type="DECIMAL(10,5)"/>
+            <column name="status" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

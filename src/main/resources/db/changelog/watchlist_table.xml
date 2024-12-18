@@ -41,11 +41,18 @@
             <column name="added_at" type="TIMESTAMP">
                 <constraints nullable="true"/>
             </column>
-            <foreignKeyConstraint baseTableName="watchlist_stocks"
-                                  baseColumnNames="watchlist_id"
-                                  referencedTableName="watchlist"
-                                  referencedColumnNames="id"
-                                  onDelete="CASCADE"/>
         </createTable>
     </changeSet>
+    
+        <!-- Add foreign key constraint between watchlist_stocks.id and watchlist.id -->
+    <changeSet id="3-add-foreign-key" author="developer">
+        <addForeignKeyConstraint
+            constraintName="fk_watchlist_stocks_to_watchlist"
+            baseTableName="watchlist_stocks"
+            baseColumnNames="watchlist_id"
+            referencedTableName="watchlist"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+    </changeSet>
+    
 </databaseChangeLog>

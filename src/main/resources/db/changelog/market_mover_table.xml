@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Create table for Market Mover Data -->
+    <changeSet id="2-create-market-mover-table" author="developer">
+        <createTable tableName="market_mover">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="symbol" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange" type="VARCHAR(50)"/>
+            <column name="mic_code" type="VARCHAR(50)"/>
+            <column name="datetime" type="TIMESTAMP"/>
+            <column name="last_price" type="DECIMAL(10,2)"/>
+            <column name="high_price" type="DECIMAL(10,2)"/>
+            <column name="low_price" type="DECIMAL(10,2)"/>
+            <column name="volume" type="BIGINT"/>
+            <column name="change" type="float(53)"/>
+            <column name="percent_change" type="DECIMAL(10,2)"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

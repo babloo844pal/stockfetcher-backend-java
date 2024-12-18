@@ -1,4 +1,4 @@
-package com.stockfetcher.model;
+package com.stockfetcher.processor;
 
 import jakarta.persistence.*;
 import lombok.Data;

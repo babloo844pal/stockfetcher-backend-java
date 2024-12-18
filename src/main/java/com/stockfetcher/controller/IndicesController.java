@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/fetchStock/twelvedata")
+@RequestMapping("/fetchStock")
 public class IndicesController {
 
     private final IndicesService indicesService;

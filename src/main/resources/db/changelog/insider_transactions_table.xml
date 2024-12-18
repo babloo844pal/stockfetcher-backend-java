@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Create insider_transactions table -->
+    <changeSet id="create-insider-transactions-table-1" author="developer">
+        <createTable tableName="insider_transactions">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="meta_id" type="BIGINT" remarks="Reference to meta table">
+                <constraints foreignKeyName="fk_meta_info" references="meta_info(id)" nullable="false"/>
+            </column>
+            <column name="full_name" type="VARCHAR(255)" remarks="Full name of the person"/>
+            <column name="position" type="VARCHAR(100)" remarks="Position of the insider"/>
+            <column name="date_reported" type="DATE" remarks="Date reported"/>
+            <column name="is_direct" type="BOOLEAN" remarks="Direct or indirect transaction"/>
+            <column name="shares" type="BIGINT" remarks="Number of shares involved"/>
+            <column name="value" type="DECIMAL(20,2)" remarks="Transaction value"/>
+            <column name="description" type="TEXT" remarks="Transaction description"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
+

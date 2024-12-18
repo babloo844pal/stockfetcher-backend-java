@@ -7,6 +7,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stockfetch.cache.StatisticsRedisService;
 import com.stockfetcher.model.MetaEntity;
 import com.stockfetcher.model.StatisticsEntity;
 import com.stockfetcher.repository.MetaRepository;

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Create institutional_holders table -->
+    <changeSet id="create-institutional-holders-table" author="developer">
+        <createTable tableName="institutional_holders">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="meta_id" type="BIGINT" remarks="Reference to meta table">
+                <constraints foreignKeyName="fk_institutional_meta" references="meta_info(id)" nullable="false"/>
+            </column>
+            <column name="entity_name" type="VARCHAR(255)" remarks="Institution entity name"/>
+            <column name="date_reported" type="DATE" remarks="Date reported"/>
+            <column name="shares" type="BIGINT" remarks="Number of shares held"/>
+            <column name="value" type="DECIMAL(20,2)" remarks="Value of shares held"/>
+            <column name="percent_held" type="DECIMAL(10,8)" remarks="Percentage of total shares held"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

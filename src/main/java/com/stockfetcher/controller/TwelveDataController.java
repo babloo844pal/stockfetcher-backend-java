@@ -12,7 +12,7 @@ import com.stockfetcher.service.RealTimeStockService;
 import com.stockfetcher.service.TwelveDataService;
 
 @RestController
-@RequestMapping("/fetchStock/twelvedata")
+@RequestMapping("/fetchStock")
 public class TwelveDataController {
 
 	

@@ -9,7 +9,7 @@ import com.stockfetcher.model.StatisticsEntity;
 import com.stockfetcher.service.StatisticsService;
 
 @RestController
-@RequestMapping("/fetchStock/twelvedata")
+@RequestMapping("/fetchStock")
 public class StatisticsController {
 
     private final StatisticsService statisticsService;

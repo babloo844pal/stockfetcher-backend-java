@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.stockfetcher.model.Watchlist;
 import com.stockfetcher.model.WatchlistStock;
+import com.stockfetcher.processor.Watchlist;
 import com.stockfetcher.service.WatchlistService;
 
 @RestController

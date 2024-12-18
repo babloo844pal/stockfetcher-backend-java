@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.stockfetcher.model.Watchlist;
 import com.stockfetcher.model.WatchlistStock;
+import com.stockfetcher.processor.Watchlist;
 import com.stockfetcher.repository.WatchlistRepository;
 import com.stockfetcher.repository.WatchlistStockRepository;
 

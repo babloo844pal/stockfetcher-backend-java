@@ -9,7 +9,7 @@ import com.stockfetcher.model.StockProfile;
 import com.stockfetcher.service.StockProfileService;
 
 @RestController
-@RequestMapping("/fetchStock/twelvedata")
+@RequestMapping("/fetchStock")
 public class StockProfileController {
 
     private final StockProfileService stockProfileService;

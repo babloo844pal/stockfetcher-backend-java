@@ -1,18 +1,26 @@
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <include file="db/changelog/stock_details-changelog.xml"/>
-     <include file="db/changelog/stock_tables-changelog.xml"/>
-      <include file="db/changelog/other_detail-changelogs.xml"/>
-      <include file="db/changelog/indices_detail-changelog.xml"/>
-      <include file="db/changelog/stock_profile_table.xml"/>
-      <include file="db/changelog/statistics_table.xml"/>
-      <include file="db/changelog/income_statement_table.xml"/>
-       <include file="db/changelog/income_statement_table.xml"/>
-       <include file="db/changelog/watchlist_table.xml"/>
-      
-      
+	<include file="db/changelog/meta_info_table.xml" />
+	<include file="db/changelog/stock_details-changelog.xml" />
+	<include file="db/changelog/stock_tables-changelog.xml" />
+	<include file="db/changelog/other_detail-changelogs.xml" />
+	<include file="db/changelog/indices_detail-changelog.xml" />
+	<include file="db/changelog/stock_profile_table.xml" />
+	<include file="db/changelog/statistics_table.xml" />
+	<include file="db/changelog/income_statement_table.xml" />
+	<include file="db/changelog/watchlist_table.xml" />
+	<include file="db/changelog/stock_table.xml" />
+	<include file="db/changelog/market_table.xml" />
+	<include file="db/changelog/technical_indicators_table.xml" />
+	<include file="db/changelog/market_mover_table.xml" />
+	<include file="db/changelog/recommendations_table.xml" />
+	<include file="db/changelog/balance_sheet_table.xml" />
+	<include file="db/changelog/insider_transactions_table.xml" />
+	<include file="db/changelog/institutional_holders_table.xml" />
+
+
 </databaseChangeLog>

@@ -10,6 +10,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stockfetch.cache.IncomeStatementRedisService;
 import com.stockfetcher.model.IncomeStatementEntity;
 import com.stockfetcher.repository.IncomeStatementRepository;
 
