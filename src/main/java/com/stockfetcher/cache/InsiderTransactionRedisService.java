@@ -1,4 +1,4 @@
-package com.stockfetch.cache;
+package com.stockfetcher.cache;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

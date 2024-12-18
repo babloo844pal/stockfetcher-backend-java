@@ -9,7 +9,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stockfetch.cache.StockRedisService;
+import com.stockfetcher.cache.StockRedisService;
 import com.stockfetcher.model.StockEntity;
 import com.stockfetcher.repository.StockRepository;
 

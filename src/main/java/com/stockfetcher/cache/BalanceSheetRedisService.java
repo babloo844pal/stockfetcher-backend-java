@@ -1,4 +1,4 @@
-package com.stockfetch.cache;
+package com.stockfetcher.cache;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -9,12 +9,15 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stockfetcher.model.InstitutionalHolderEntity;
+import com.stockfetcher.model.BalanceSheetEntity;
+
+import lombok.NoArgsConstructor;
 
 @Service
-public class InstitutionalHolderRedisService {
+@NoArgsConstructor
+public class BalanceSheetRedisService {
 
-    private static final int CACHE_TIMEOUT = 10; // Cache timeout in minutes
+    private static final int CACHE_TIMEOUT = 10; // Cache expiration in minutes
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -22,21 +25,19 @@ public class InstitutionalHolderRedisService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void saveToCache(String key, List<InstitutionalHolderEntity> data) {
+    public void saveToCache(String key, List<BalanceSheetEntity> data) {
         try {
-            redisTemplate.opsForValue().set(
-                key, objectMapper.writeValueAsString(data), CACHE_TIMEOUT, TimeUnit.MINUTES
-            );
+            redisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(data), CACHE_TIMEOUT, TimeUnit.MINUTES);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error saving institutional holders to Redis", e);
+            throw new RuntimeException("Error saving data to Redis", e);
         }
     }
 
-    public List<InstitutionalHolderEntity> getFromCache(String key) {
+    public List<BalanceSheetEntity> getFromCache(String key) {
         String json = (String) redisTemplate.opsForValue().get(key);
         if (json != null) {
             try {
-                return List.of(objectMapper.readValue(json, InstitutionalHolderEntity[].class));
+                return List.of(objectMapper.readValue(json, BalanceSheetEntity[].class));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Error fetching data from Redis", e);
             }
@@ -45,10 +46,10 @@ public class InstitutionalHolderRedisService {
     }
 
     public String getCacheKeyBySymbol(String symbol) {
-        return "institutional_holders_" + symbol;
+        return "balance_sheet_" + symbol;
     }
 
     public String getCacheKeyBySymbolAndExchange(String symbol, String exchange) {
-        return "institutional_holders_" + symbol + "_" + exchange;
+        return "balance_sheet_" + symbol + "_" + exchange;
     }
 }

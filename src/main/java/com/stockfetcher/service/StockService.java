@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stockfetch.cache.RedisService;
+import com.stockfetcher.cache.RedisService;
 import com.stockfetcher.enums.Interval_Slice;
 import com.stockfetcher.model.StockMeta;
 import com.stockfetcher.model.StockPrice;

@@ -10,7 +10,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stockfetch.cache.TechnicalIndicatorsRedisService;
+import com.stockfetcher.cache.TechnicalIndicatorsRedisService;
 import com.stockfetcher.model.TechnicalIndicatorsData;
 import com.stockfetcher.repository.TechnicalIndicatorsDataRepository;
 

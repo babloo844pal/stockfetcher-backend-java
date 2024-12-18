@@ -7,7 +7,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stockfetch.cache.RecommendationsRedisService;
+import com.stockfetcher.cache.RecommendationsRedisService;
 import com.stockfetcher.model.RecommendationsEntity;
 import com.stockfetcher.repository.RecommendationsRepository;
 

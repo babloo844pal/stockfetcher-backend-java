@@ -1,4 +1,4 @@
-package com.stockfetch.cache;
+package com.stockfetcher.cache;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;

@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.stockfetch.cache.MetaInfoRedisService;
+import com.stockfetcher.cache.MetaInfoRedisService;
 import com.stockfetcher.model.MetaInfoEntity;
 import com.stockfetcher.repository.MetaInfoRepository;
 

@@ -12,7 +12,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stockfetch.cache.InsiderTransactionRedisService;
+import com.stockfetcher.cache.InsiderTransactionRedisService;
 import com.stockfetcher.model.InsiderTransactionEntity;
 import com.stockfetcher.model.MetaInfoEntity;
 import com.stockfetcher.repository.InsiderTransactionRepository;
