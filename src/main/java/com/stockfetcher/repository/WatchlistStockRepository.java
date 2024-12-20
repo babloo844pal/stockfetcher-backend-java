@@ -9,5 +9,10 @@ import com.stockfetcher.model.WatchlistStock;
 
 @Repository
 public interface WatchlistStockRepository extends JpaRepository<WatchlistStock, Long> {
+    
+    // Fetch all stocks in a specific watchlist
     List<WatchlistStock> findByWatchlistId(Long watchlistId);
+
+    // Count the number of stocks in a watchlist
+    long countByWatchlistId(Long watchlistId);
 }

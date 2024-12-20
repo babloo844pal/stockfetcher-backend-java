@@ -12,4 +12,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
+    
+    @ExceptionHandler(WatchlistAlreadyExistsException.class)
+    public ResponseEntity<String> handleWatchlistAlreadyExistsException(WatchlistAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+    
+    @ExceptionHandler(WatchlistLimitExceededException.class)
+    public ResponseEntity<String> handleWatchlistLimitExceededException(WatchlistLimitExceededException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
 }

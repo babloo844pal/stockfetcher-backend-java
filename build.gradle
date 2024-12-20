@@ -19,9 +19,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation group: 'org.springframework.kafka', name: 'spring-kafka'
 
-    // Jackson for JSON serialization/deserialization
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
-
     // Lombok (no code changes provided, as requested)
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -42,6 +39,10 @@ dependencies {
     
 	    // Liquibase
     implementation 'org.liquibase:liquibase-core'
+    
+    implementation 'org.modelmapper:modelmapper:3.2.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
 
    
 }

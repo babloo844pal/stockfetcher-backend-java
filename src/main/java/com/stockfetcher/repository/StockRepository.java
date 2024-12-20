@@ -10,9 +10,20 @@ import com.stockfetcher.model.StockEntity;
 @Repository
 public interface StockRepository extends JpaRepository<StockEntity, Long> {
 
-    // Find all stocks by country
-    List<StockEntity> findByCountry(String country);
+	// Find all stocks by country
+	List<StockEntity> findByCountry(String country);
 
-    // Find stocks by country and exchange
-    List<StockEntity> findByCountryAndExchange(String country, String exchange);
+	// Find stocks by country and exchange
+	List<StockEntity> findByCountryAndExchange(String country, String exchange);
+
+	// Dynamically derived query with optional parameters
+	List<StockEntity> findTop10ByCountryIgnoreCaseAndExchangeIgnoreCaseAndSymbolStartingWithIgnoreCase(String country,
+			String exchange, String prefix);
+
+	// For cases where some parameters are null, use overloaded methods or nullable
+	// fields
+	List<StockEntity> findTop10ByExchangeIgnoreCaseAndSymbolStartingWithIgnoreCase(String exchange, String prefix);
+
+	List<StockEntity> findTop10BySymbolStartingWithIgnoreCase(String prefix);
+
 }
