@@ -37,6 +37,13 @@ public class StockController {
 		return stockMetaService.getStocksByCountryAndExchange(country, exchange);
 	}
 
+	// Get stocks by country and exchange
+	@GetMapping("/country-exchange-symbol")
+	public StockEntity getStocksByCountryAndExchangeAndSymbol(@RequestParam("country") String country,
+			@RequestParam("exchange") String exchange, @RequestParam("symbol") String symbol) {
+		return stockMetaService.getStocksByCountryAndExchangeAndSymbol(country, exchange, symbol);
+	}
+
 	@GetMapping("/search")
 	public List<StockEntity> searchStocks(@RequestParam("country") String country,
 			@RequestParam("exchange") String exchange, @RequestParam("prefix") String prefix) {

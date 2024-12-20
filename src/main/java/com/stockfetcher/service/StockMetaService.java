@@ -170,6 +170,30 @@ public class StockMetaService {
 		throw new RuntimeException("No stocks found for country: " + country + " and exchange: " + exchange);
 	}
 
+	
+	// Get stocks by country and exchange
+	public StockEntity getStocksByCountryAndExchangeAndSymbol(String country, String exchange,String symbol) {
+
+		// 1. Check Redis Cache
+		String cacheKey = MessageFormat.format(CacheConstant.STOCK_META_BYCOUNTRY_BYEXCHANGE_BYSYMBOL, country, exchange, symbol);
+		StockEntity cachedStocks = genericRedisService.get(cacheKey, StockEntity.class);
+		if (cachedStocks != null) {
+			log.info("Data successfully fetched from cache.");
+			return cachedStocks;
+		}
+
+		// Check database
+		StockEntity dbStocks = stockRepository.findByCountryAndExchangeAndSymbol(country, exchange,symbol);
+		if (dbStocks !=null) {
+			log.info("Data successfully fetched from Database.");
+			genericRedisService.save(cacheKey, dbStocks, 1440L);
+			log.info("Data successfully stored into cache.");
+			return dbStocks;
+		}
+			throw new RuntimeException("No stocks found for country: " + country + " and exchange: " + exchange+ " and symbol: " + symbol);
+	}
+	
+	
 	public List<StockEntity> searchStocksWithCache(String country, String exchange,String prefix) {
 		String cacheKey = MessageFormat.format(CacheConstant.STOCK_META_BYCOUNTRY_BYEXCHANGE_BYPREFIX, country, exchange);
 		// Check cache first
