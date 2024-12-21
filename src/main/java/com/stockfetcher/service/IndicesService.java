@@ -1,97 +1,141 @@
 package com.stockfetcher.service;
 
-import java.util.ArrayList;
+import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stockfetcher.api.TwelveDataApiClient;
+import com.stockfetcher.cache.GenericRedisService;
+import com.stockfetcher.constants.CacheConstant;
+import com.stockfetcher.model.Country;
 import com.stockfetcher.model.Indices;
 import com.stockfetcher.repository.IndicesRepository;
 
 @Service
 public class IndicesService {
 
-    private final IndicesRepository indicesRepository;
-    private final WebClient webClient;
-    private final ObjectMapper objectMapper;
-    
-	@Value("${twelve.data.api.key}")
-	private String API_KEY;
+	@Autowired
+	private IndicesRepository indicesRepository;
 
-	@Value("${twelve.data.api.url}")
-	private String API_URL;
+	@Autowired
+	private GenericRedisService redisService;
 
-    public IndicesService(IndicesRepository indicesRepository, WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
-        this.indicesRepository = indicesRepository;
-        this.webClient = webClientBuilder.baseUrl(API_URL).build(); // Replace with Twelve Data API base URL
-        this.objectMapper = objectMapper;
-    }
+	@Autowired
+	private TwelveDataApiClient apiClient;
 
-    /**
-     * Fetches indices data from the Twelve Data API and saves it to the database.
-     *
-     * @param apiKey The API key for Twelve Data.
-     * @return List of saved IndicesEntity.
-     */
-    public List<Indices> fetchAndSaveIndices(String apiKey) {
-        try {
-            // Call the Twelve Data API
-			String url = UriComponentsBuilder.fromUriString(API_URL + "/indices").queryParam("apikey", API_KEY)
-					.build().toString();
+	@Autowired
+	private ObjectMapper objectMapper;
 
-			JsonNode rootNode = webClient.get().uri(url).retrieve().bodyToMono(JsonNode.class).block();
-   //         JsonNode rootNode = objectMapper.readTree(response);
+	public List<Indices> fetchIndices() {
 
-            // Parse and save indices
-            List<Indices> savedEntities = new ArrayList<>();
-            if (rootNode.has("data")) {
-                for (JsonNode node : rootNode.get("data")) {
-                	Indices entity = new Indices();
-                    entity.setSymbol(node.get("symbol").asText());
-                    entity.setName(node.get("name").asText());
-                    entity.setCountry(node.get("country").asText());
-                    entity.setCurrency(node.get("currency").asText());
-                    entity.setExchange(node.get("exchange").asText());
-                    entity.setMicCode(node.get("mic_code").asText());
+		// Check cache
+		List<Indices> cachedIndices = redisService.get(CacheConstant.INDICES_DATA, List.class);
+		if (cachedIndices != null) {
+			return cachedIndices;
+		}
 
-                    savedEntities.add(indicesRepository.save(entity));
-                }
-            }
-            return savedEntities;
+		// Fetch from database
+		List<Indices> dbIndices = indicesRepository.findAll();
+		if (!dbIndices.isEmpty()) {
+			redisService.save(CacheConstant.INDICES_DATA, dbIndices, 10080L); // Cache for 1 week
+			saveIndicesCacheBySymbol(dbIndices);
+			saveIndicesCacheByCountry(dbIndices);
+			return dbIndices;
+		}
 
-        } catch (Exception e) {
-            throw new RuntimeException("Error fetching indices from API: " + e.getMessage(), e);
-        }
-    }
+		// Fetch from API
+		List<Indices> apiIndices = fetchIndicesFromApi();
+		if (!apiIndices.isEmpty()) {
+			indicesRepository.saveAll(apiIndices);
+			redisService.save(CacheConstant.INDICES_DATA, apiIndices, 10080L);
+			saveIndicesCacheBySymbol(apiIndices);
+			saveIndicesCacheByCountry(apiIndices);
+			return apiIndices;
+		}
 
-    /**
-     * Retrieves all indices from the database.
-     *
-     * @return List of IndicesEntity.
-     */
-    public List<Indices> getAllIndices() {
-        return indicesRepository.findAll();
-    }
-    
-    public List<Indices> getAllIndicesByCountry(String country) {
-        return indicesRepository.findByCountry(country);
-    }
-    
-    public List<Indices> getAllIndicesByCountryAndExchange(String country,String exchange) {
-        return indicesRepository.findByCountryAndExchange(country,exchange);
-    }
-    
-    public Indices getIndicesByCountryAndExchangeAndByName(String country,String exchange,String name) {
-        return indicesRepository.findByCountryAndExchangeAndName(country,exchange,name);
-    }
-    
-    public Indices getIndicesByCountryAndExchangeAndBySymbol(String country,String exchange,String symbol) {
-        return indicesRepository.findByCountryAndExchangeAndSymbol(country,exchange,symbol);
-    }
-    
+		
+		throw new RuntimeException("No indices data found in cache, database, or API.");
+	}
+
+	private List<Indices> fetchIndicesFromApi() {
+
+		try {
+			Map<String, String> queryParams = new HashMap<>();
+			queryParams.put("source", "docs");
+			String response = apiClient.fetchData("/indices", queryParams);
+			JsonNode rootNode = objectMapper.readTree(response);
+			JsonNode dataNode = rootNode.get("data");
+
+			if (dataNode != null && dataNode.isArray()) {
+				return objectMapper.readValue(dataNode.toString(),
+						objectMapper.getTypeFactory().constructCollectionType(List.class, Indices.class));
+			}
+
+		} catch (Exception e) {
+			throw new RuntimeException("Error fetching stocks from Twelve Data API: " + e.getMessage(), e);
+		}
+		return List.of();
+
+	}
+
+	private void saveIndicesCacheBySymbol(List<Indices> indices) {
+		indices.forEach(indice -> {
+			redisService.save(MessageFormat.format(CacheConstant.INDICES_DATA_BYSYMBOL, indice.getSymbol()),
+					List.of(indice), 10080L); // Cache for 1 week (10080 minutes)
+		});
+	}
+
+	private void saveIndicesCacheByCountry(List<Indices> indices) {
+		indices.forEach(indice -> {
+			redisService.save(MessageFormat.format(CacheConstant.INDICES_DATA_BYCOUNTRY, indice.getCountry()),
+					List.of(indice), 10080L); // Cache for 1 week (10080 minutes)
+		});
+	}
+
+	public List<Indices> getIndicesByCountries(String country) {
+		String cacheKey = MessageFormat.format(CacheConstant.INDICES_DATA_BYCOUNTRY, country);
+
+		// Check cache
+		List<Indices> cachedIndices = redisService.get(cacheKey, List.class);
+		if (cachedIndices != null) {
+			return cachedIndices;
+		}
+
+		// Fetch from database
+		List<Indices> dbIndices = indicesRepository.findByCountryIgnoreCase(country);
+		if (!dbIndices.isEmpty()) {
+			redisService.save(cacheKey, dbIndices, 10080L); // Cache for 1 week
+			saveIndicesCacheBySymbol(dbIndices);
+			return dbIndices;
+		}
+
+		fetchIndices();
+		throw new RuntimeException("No country data found in cache, database, or API.");
+	}
+
+	public Indices getIndicesBySymol(String symbol) {
+		String cacheKey = MessageFormat.format(CacheConstant.INDICES_DATA_BYSYMBOL, symbol);
+
+		// Check cache
+		Indices cachedIndice = redisService.get(cacheKey, Indices.class);
+		if (cachedIndice != null) {
+			return cachedIndice;
+		}
+
+		// Fetch from database
+		Indices dbIndice = indicesRepository.findBySymbolIgnoreCase(symbol);
+		if (dbIndice != null) {
+			redisService.save(cacheKey, dbIndice, 10080L); // Cache for 1 week
+			return dbIndice;
+		}
+
+		fetchIndices();
+		throw new RuntimeException("No country data found in cache, database, or API.");
+	}
 }

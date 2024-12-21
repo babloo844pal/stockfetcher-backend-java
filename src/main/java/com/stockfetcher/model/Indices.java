@@ -1,5 +1,9 @@
 package com.stockfetcher.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,14 +16,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "indices")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Indices {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id
-    private Long id;
-    private String symbol;
-    private String name;
-    private String country;
-    private String currency;
-    private String exchange;
-    private String micCode;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Id
+	private Long id;
+	private String symbol;
+	private String name;
+	private String country;
+	private String currency;
+	private String exchange;
+
+	@JsonProperty("mic_code")
+	@Column(name = "mic_code", nullable = false)
+	private String micCode;
 }

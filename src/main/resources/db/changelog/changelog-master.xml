@@ -21,6 +21,7 @@
 	<include file="db/changelog/balance_sheet_table.xml" />
 	<include file="db/changelog/insider_transactions_table.xml" />
 	<include file="db/changelog/institutional_holders_table.xml" />
+	<include file="db/changelog/country_data_table.xml" />
 
 
 </databaseChangeLog>

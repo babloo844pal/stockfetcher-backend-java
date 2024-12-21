@@ -9,9 +9,8 @@ import com.stockfetcher.model.Indices;
 
 @Repository
 public interface IndicesRepository extends JpaRepository<Indices, Long> {
-	
-	 List<Indices> findByCountry(String country);
-	 List<Indices> findByCountryAndExchange(String country,String exchange);
-	 Indices findByCountryAndExchangeAndName(String country,String exchange,String name);
-	 Indices findByCountryAndExchangeAndSymbol(String country,String exchange,String symbol);
+
+	List<Indices> findByCountryIgnoreCase(String country);
+
+	Indices findBySymbolIgnoreCase(String symbol);
 }
