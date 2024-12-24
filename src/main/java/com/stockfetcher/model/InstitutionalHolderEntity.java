@@ -20,26 +20,26 @@ import lombok.NoArgsConstructor;
 @Table(name = "institutional_holders")
 public class InstitutionalHolderEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "meta_id", nullable = false)
-    private MetaInfoEntity metaInfo;
+	@ManyToOne
+	@JoinColumn(name = "meta_id", nullable = false)
+	private MetaInfo metaInfo;
 
-    @Column(name = "entity_name")
-    private String entityName;
+	@Column(name = "entity_name")
+	private String entityName;
 
-    @Column(name = "date_reported")
-    private LocalDate dateReported;
+	@Column(name = "date_reported")
+	private LocalDate dateReported;
 
-    @Column(name = "shares")
-    private Long shares;
+	@Column(name = "shares")
+	private Long shares;
 
-    @Column(name = "value", precision = 20, scale = 2)
-    private BigDecimal value;
+	@Column(name = "value", precision = 20, scale = 2)
+	private BigDecimal value;
 
-    @Column(name = "percent_held", precision = 10, scale = 8)
-    private BigDecimal percentHeld;
+	@Column(name = "percent_held", precision = 10, scale = 8)
+	private BigDecimal percentHeld;
 }

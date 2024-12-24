@@ -1,25 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <!-- Create income_statement table -->
-    <changeSet id="1-create-income-statement-table" author="developer">
-        <createTable tableName="income_statement">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="symbol" type="VARCHAR(50)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="fiscal_date" type="DATE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="data" type="TEXT">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-    </changeSet>
+
+	<!-- Income Statement Table -->
+	<changeSet id="6" author="author">
+		<createTable tableName="income_statement">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="meta_info_id" type="BIGINT">
+				<constraints nullable="false"
+					foreignKeyName="fk_income_meta" references="meta_info(id)" />
+			</column>
+			<column name="fiscal_date" type="DATE">
+				<constraints nullable="false" />
+			</column>
+			<column name="sales" type="BIGINT" />
+			<column name="cost_of_goods" type="BIGINT" />
+			<column name="gross_profit" type="BIGINT" />
+			<column name="research_and_development" type="BIGINT" />
+			<column name="selling_general_and_administrative"
+				type="BIGINT" />
+			<column name="operating_income" type="BIGINT" />
+			<column name="non_operating_interest_income" type="BIGINT" />
+			<column name="non_operating_interest_expense" type="BIGINT" />
+			<column name="other_income_expense" type="BIGINT" />
+			<column name="pretax_income" type="BIGINT" />
+			<column name="income_tax" type="BIGINT" />
+			<column name="net_income" type="BIGINT" />
+			<column name="eps_basic" type="DECIMAL(10,2)" />
+			<column name="eps_diluted" type="DECIMAL(10,2)" />
+			<column name="ebit" type="BIGINT" />
+			<column name="ebitda" type="BIGINT" />
+		</createTable>
+	</changeSet>
 </databaseChangeLog>

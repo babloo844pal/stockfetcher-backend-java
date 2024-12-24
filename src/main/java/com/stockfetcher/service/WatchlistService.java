@@ -13,8 +13,8 @@ import com.stockfetcher.dto.response.WatchlistResponseDto;
 import com.stockfetcher.dto.response.WatchlistStockResponseDto;
 import com.stockfetcher.exception.WatchlistAlreadyExistsException;
 import com.stockfetcher.exception.WatchlistLimitExceededException;
+import com.stockfetcher.model.Watchlist;
 import com.stockfetcher.model.WatchlistStock;
-import com.stockfetcher.processor.Watchlist;
 import com.stockfetcher.repository.WatchlistRepository;
 import com.stockfetcher.repository.WatchlistStockRepository;
 import com.stockfetcher.utils.GenericMapperUtil;
@@ -61,7 +61,7 @@ public class WatchlistService {
 		return watchlistRepository.findById(id).orElseThrow(() -> new RuntimeException("Watchlist not found"));
 	}
 
-	// Get Watchlist by ID
+	// Get Watchlist 
 	public List<WatchlistResponseDto> getAllWatchlist() {
 		List<Watchlist> watchlistList = watchlistRepository.findAll();
 		List<WatchlistResponseDto> watchlistResponseDtoList = GenericMapperUtil.convertToDtoList(watchlistList,
@@ -116,7 +116,7 @@ public class WatchlistService {
 	}
 
 	// Delete stock from watchlist
-	public void deleteStockFromWatchlist(Long watchlistId,Long stockId) {
+	public void deleteStockFromWatchlist(Long watchlistId, Long stockId) {
 		watchlistStockRepository.deleteById(stockId);
 	}
 

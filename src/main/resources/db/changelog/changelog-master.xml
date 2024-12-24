@@ -4,7 +4,8 @@
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-	<include file="db/changelog/meta_info_table.xml" />
+	<include file="db/changelog/meta_info_historical_realtime.xml" />
+	<include file="db/changelog/stock_historical_realtime_data.xml" />
 	<include file="db/changelog/stock_details-changelog.xml" />
 	<include file="db/changelog/stock_tables-changelog.xml" />
 	<include file="db/changelog/other_detail-changelogs.xml" />
@@ -22,6 +23,8 @@
 	<include file="db/changelog/insider_transactions_table.xml" />
 	<include file="db/changelog/institutional_holders_table.xml" />
 	<include file="db/changelog/country_data_table.xml" />
+	
+	
 
 
 </databaseChangeLog>

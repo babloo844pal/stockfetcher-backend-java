@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stockfetcher.dto.request.WatchlistRequestDto;
 import com.stockfetcher.dto.response.WatchlistResponseDto;
 import com.stockfetcher.dto.response.WatchlistStockResponseDto;
+import com.stockfetcher.model.Watchlist;
 import com.stockfetcher.model.WatchlistStock;
-import com.stockfetcher.processor.Watchlist;
 import com.stockfetcher.service.WatchlistService;
 
 import jakarta.validation.Valid;
@@ -78,8 +78,9 @@ public class WatchlistController {
 
 	// Delete stock from a watchlist
 	@DeleteMapping("/{watchlistId}/stocks/{stockId}")
-	public void deleteStockFromWatchlist(@PathVariable("watchlistId") Long watchlistId,@PathVariable("stockId") Long stockId) {
-		watchlistService.deleteStockFromWatchlist(watchlistId,stockId);
+	public void deleteStockFromWatchlist(@PathVariable("watchlistId") Long watchlistId,
+			@PathVariable("stockId") Long stockId) {
+		watchlistService.deleteStockFromWatchlist(watchlistId, stockId);
 	}
 
 	// Get stocks in a watchlist

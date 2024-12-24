@@ -1,93 +1,88 @@
 package com.stockfetcher.service;
 
-import java.util.ArrayList;
+import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stockfetcher.cache.IncomeStatementRedisService;
-import com.stockfetcher.model.IncomeStatementEntity;
+import com.stockfetcher.api.TwelveDataApiClient;
+import com.stockfetcher.cache.GenericRedisService;
+import com.stockfetcher.constants.CacheConstant;
+import com.stockfetcher.model.IncomeStatement;
+import com.stockfetcher.model.MetaInfo;
 import com.stockfetcher.repository.IncomeStatementRepository;
+import com.stockfetcher.repository.MetaInfoRepository;
 
 @Service
 public class IncomeStatementService {
 
-    private final IncomeStatementRepository incomeStatementRepository;
-    private final IncomeStatementRedisService redisService;
-    private final WebClient webClient;
-    private final ObjectMapper objectMapper;
-    
-	@Value("${twelve.data.api.key}")
-	private String API_KEY;
+	@Autowired
+	private IncomeStatementRepository incomeStatementRepository;
 
-	@Value("${twelve.data.api.url}")
-	private String API_URL;
+	@Autowired
+	private MetaInfoRepository metaInfoRepository;
 
-    public IncomeStatementService(IncomeStatementRepository incomeStatementRepository, IncomeStatementRedisService redisService, WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
-        this.incomeStatementRepository = incomeStatementRepository;
-        this.redisService = redisService;
-        this.webClient = webClientBuilder.baseUrl("https://api.twelvedata.com").build();
-        this.objectMapper = objectMapper;
-    }
+	@Autowired
+	private GenericRedisService redisService;
 
-    public List<IncomeStatementEntity> getIncomeStatements(String symbol, String apiKey) {
-        // Check database for all statements of a symbol
-        List<IncomeStatementEntity> dbStatements = incomeStatementRepository.findBySymbol(symbol);
-        if (!dbStatements.isEmpty()) {
-            return dbStatements;
-        }
-        
-        // Fetch from API
-        String url = UriComponentsBuilder.fromUriString(API_URL + "/income_statement?").queryParam("symbol", symbol)
-				.queryParam("apikey", API_KEY).build().toString();
+	@Autowired
+	private TwelveDataApiClient apiClient;
 
-		String response = webClient.get().uri(url).retrieve().bodyToMono(String.class).block();
+	public List<IncomeStatement> getIncomeStatements(String symbol, String exchange) {
+		String cacheKey = MessageFormat.format(CacheConstant.INCOME_DATA_BYSYMBOL_BYEXCHANGE, symbol, exchange);
 
-        try {
-            JsonNode rootNode = objectMapper.readTree(response);
-            List<IncomeStatementEntity> statements = new ArrayList<>();
+		// Fetch from cache
+		List<IncomeStatement> cachedData = redisService.get(cacheKey, List.class);
+		if (cachedData != null) {
+			return cachedData;
+		}
 
-            for (JsonNode statementNode : rootNode.get("income_statement")) {
-                IncomeStatementEntity entity = new IncomeStatementEntity();
-                entity.setSymbol(symbol);
-                entity.setFiscalDate(statementNode.get("fiscal_date").asText());
-                entity.setData(statementNode.toString());
+		// Fetch MetaInfo
+		MetaInfo metaInfo = metaInfoRepository.findBySymbolAndExchange(symbol, exchange)
+				.orElseThrow(() -> new RuntimeException("MetaInfo not found for symbol: " + symbol));
 
-                // Save to database and cache
-                incomeStatementRepository.save(entity);
-                redisService.saveIncomeStatementToCache(entity);
-                statements.add(entity);
-            }
+		// Fetch from DB
+		List<IncomeStatement> dbData = incomeStatementRepository.findByMetaInfo(metaInfo);
+		if (!dbData.isEmpty()) {
+			redisService.save(cacheKey, dbData, 1440L); // Cache for 1 day
+			return dbData;
+		}
 
-            return statements;
-        } catch (Exception e) {
-            throw new RuntimeException("Error processing API response for income statements: " + e.getMessage(), e);
-        }
-    }
+		// Fetch from API
+		List<IncomeStatement> apiData = fetchIncomeStatementFromApi(symbol, exchange);
+		if (!apiData.isEmpty()) {
+			apiData.forEach(data -> data.setMetaInfo(metaInfo));
+			incomeStatementRepository.saveAll(apiData);
+			redisService.save(cacheKey, apiData, 1440L); // Cache for 1 day
+		}
 
-    public IncomeStatementEntity getIncomeStatement(String symbol, String fiscalDate, String apiKey) {
-        // Check Redis cache
-        IncomeStatementEntity cachedStatement = redisService.getIncomeStatementFromCache(symbol, fiscalDate);
-        if (cachedStatement != null) {
-            return cachedStatement;
-        }
+		return apiData;
+	}
 
-        // Check database
-        IncomeStatementEntity dbStatement = incomeStatementRepository.findBySymbolAndFiscalDate(symbol, fiscalDate);
-        if (dbStatement != null) {
-            redisService.saveIncomeStatementToCache(dbStatement); // Cache it
-            return dbStatement;
-        }
+	private List<IncomeStatement> fetchIncomeStatementFromApi(String symbol, String exchange) {
+		try {
 
-        // Fetch from API if not in cache or database
-        return getIncomeStatements(symbol, apiKey).stream()
-                .filter(statement -> statement.getFiscalDate().equals(fiscalDate))
-                .findFirst()
-                .orElse(null);
-    }
+			Map<String, String> queryParams = new HashMap<>();
+			queryParams.put("source", "docs");
+			queryParams.put("symbol", symbol);
+			queryParams.put("exchange", exchange);
+			
+			String response = apiClient.fetchData("/income_statement", queryParams);
+
+			JsonNode rootNode = new ObjectMapper().readTree(response);
+			JsonNode incomeStatementsNode = rootNode.get("income_statement");
+
+			return new ObjectMapper().readValue(incomeStatementsNode.toString(),
+					new TypeReference<List<IncomeStatement>>() {
+					});
+		} catch (Exception e) {
+			throw new RuntimeException("Error fetching Income Statement data from API: " + e.getMessage(), e);
+		}
+	}
 }

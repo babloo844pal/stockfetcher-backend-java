@@ -16,5 +16,9 @@ public class CacheConstant {
 	public static final String INDICES_DATA_BYCOUNTRY="indices_bycountry_{0}";
 	public static final String INDICES_DATA_BYSYMBOL="indices_bySymbol_{0}";
 	
+	public static final String HISTORICAL_DATA_BYSYMBOL_BYINTERVAL="historical_data__bySymbol_{0}_byInterval_{1}";
+	
+	public static final String INCOME_DATA_BYSYMBOL_BYEXCHANGE="income_statement_{0}_{1}";
+	
 	
 }

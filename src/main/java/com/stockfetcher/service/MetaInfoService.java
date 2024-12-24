@@ -1,39 +1,53 @@
+
 package com.stockfetcher.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.stockfetcher.cache.MetaInfoRedisService;
-import com.stockfetcher.model.MetaInfoEntity;
+import com.stockfetcher.model.MetaInfo;
 import com.stockfetcher.repository.MetaInfoRepository;
 
 @Service
 public class MetaInfoService {
 
-    @Autowired
-    private MetaInfoRepository metaInfoRepository;
+	@Autowired
+	private MetaInfoRepository metaInfoRepository;
 
-    @Autowired
-    private MetaInfoRedisService redisService;
+	@Autowired
+	private MetaInfoRedisService redisService;
 
-    public MetaInfoEntity getOrSaveMetaInfo(MetaInfoEntity metaInfo) {
-        String cacheKey = redisService.getCacheKey(metaInfo.getSymbol());
-        MetaInfoEntity cachedMeta = redisService.getFromCache(cacheKey);
+	public MetaInfo getOrSaveMetaInfo(MetaInfo metaInfo) {
+		String cacheKey = redisService.getCacheKey(metaInfo.getSymbol());
+		MetaInfo cachedMeta = redisService.getFromCache(cacheKey);
 
-        if (cachedMeta != null) {
-            return cachedMeta;
-        }
+		if (cachedMeta != null) {
+			return cachedMeta;
+		}
 
-        Optional<MetaInfoEntity> existingMeta = metaInfoRepository.findBySymbol(metaInfo.getSymbol());
-        if (existingMeta.isPresent()) {
-            redisService.saveToCache(cacheKey, existingMeta.get());
-            return existingMeta.get();
-        }
+		Optional<MetaInfo> existingMeta = metaInfoRepository.findBySymbol(metaInfo.getSymbol());
+		if (existingMeta.isPresent()) {
+			redisService.saveToCache(cacheKey, existingMeta.get());
+			return existingMeta.get();
+		}
 
-        MetaInfoEntity savedMeta = metaInfoRepository.save(metaInfo);
-        redisService.saveToCache(cacheKey, savedMeta);
-        return savedMeta;
+		MetaInfo savedMeta = metaInfoRepository.save(metaInfo);
+		redisService.saveToCache(cacheKey, savedMeta);
+		return savedMeta;
+	}
+
+	public MetaInfo getOrCreateMetaInfo(MetaInfo metaInfo) {
+		return metaInfoRepository.findBySymbolAndExchange(metaInfo.getSymbol(), metaInfo.getExchange())
+				.orElseGet(() -> metaInfoRepository.save(metaInfo));
+	}
+	
+	
+	public List<MetaInfo> getMetaInfosByWatchlistId(Long watchlistId) {
+        // Fetch MetaInfo based on watchlist (logic depends on DB design)
+        return metaInfoRepository.findByWatchlistId(watchlistId);
     }
+
 }

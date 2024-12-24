@@ -7,7 +7,7 @@
 
     <!-- ChangeSet to create stock_meta table -->
     <changeSet id="1-create-stock-meta" author="developer">
-        <createTable tableName="stock_meta">
+        <createTable tableName="stock_meta1">
             <column name="symbol" type="VARCHAR(50)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>

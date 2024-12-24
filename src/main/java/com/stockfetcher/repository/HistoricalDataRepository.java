@@ -1,9 +1,12 @@
 package com.stockfetcher.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.stockfetcher.model.HistoricalData;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface HistoricalDataRepository extends JpaRepository<HistoricalData, String> {
+import java.util.List;
 
+@Repository
+public interface HistoricalDataRepository extends JpaRepository<HistoricalData, Long> {
+    List<HistoricalData> findByMetaInfoSymbolAndMetaInfoIntervalTime(String symbol, String interval);
 }

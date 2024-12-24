@@ -16,7 +16,7 @@ public interface StockRepository extends JpaRepository<StockEntity, Long> {
 	// Find stocks by country and exchange
 	List<StockEntity> findByCountryAndExchange(String country, String exchange);
 
-	StockEntity findByCountryAndExchangeAndSymbol(String country, String exchange, String symbol);
+	StockEntity findTop1ByCountryAndExchangeAndSymbol(String country, String exchange, String symbol);
 
 	// Dynamically derived query with optional parameters
 	List<StockEntity> findTop10ByCountryIgnoreCaseAndExchangeIgnoreCaseAndSymbolStartingWithIgnoreCase(String country,

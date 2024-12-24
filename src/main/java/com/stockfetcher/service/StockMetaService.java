@@ -44,7 +44,7 @@ public class StockMetaService {
 	public List<StockEntity> getAllStocks() {
 		// 1. Check Redis Cache
 		List<StockEntity> cachedStocks = genericRedisService.get(CacheConstant.STOCK_META_ALL, List.class);
-		if (cachedStocks != null) {
+		if (cachedStocks !=null) {
 			log.info("Data successfully fetched from cache.");
 			return cachedStocks;
 		}
@@ -102,7 +102,7 @@ public class StockMetaService {
 		// 1. Check Redis Cache
 		List<StockEntity> cachedStocks = genericRedisService.get(CacheConstant.STOCK_META_BYCOUNTRY + country,
 				List.class);
-		if (cachedStocks != null) {
+		if (cachedStocks !=null) {
 			log.info("Data successfully fetched from cache.");
 			return cachedStocks;
 		}
@@ -139,7 +139,7 @@ public class StockMetaService {
 
 		String cacheKey = MessageFormat.format(CacheConstant.STOCK_META_BYCOUNTRY_BYEXCHANGE, country, exchange);
 		List<StockEntity> cachedStocks = genericRedisService.get(cacheKey, List.class);
-		if (cachedStocks != null) {
+		if (cachedStocks !=null) {
 			log.info("Data successfully fetched from cache.");
 			return cachedStocks;
 		}
@@ -177,13 +177,13 @@ public class StockMetaService {
 		// 1. Check Redis Cache
 		String cacheKey = MessageFormat.format(CacheConstant.STOCK_META_BYCOUNTRY_BYEXCHANGE_BYSYMBOL, country, exchange, symbol);
 		StockEntity cachedStocks = genericRedisService.get(cacheKey, StockEntity.class);
-		if (cachedStocks != null) {
+		if (cachedStocks !=null) {
 			log.info("Data successfully fetched from cache.");
 			return cachedStocks;
 		}
 
 		// Check database
-		StockEntity dbStocks = stockRepository.findByCountryAndExchangeAndSymbol(country, exchange,symbol);
+		StockEntity dbStocks = stockRepository.findTop1ByCountryAndExchangeAndSymbol(country, exchange,symbol);
 		if (dbStocks !=null) {
 			log.info("Data successfully fetched from Database.");
 			genericRedisService.save(cacheKey, dbStocks, 1440L);
@@ -198,21 +198,21 @@ public class StockMetaService {
 		String cacheKey = MessageFormat.format(CacheConstant.STOCK_META_BYCOUNTRY_BYEXCHANGE_BYPREFIX, country, exchange);
 		// Check cache first
 		List<StockEntity> cachedResults = genericRedisService.getSearchResults(cacheKey,prefix,StockEntity[].class);
-		if (cachedResults != null) {
+		if (cachedResults !=null) {
 			log.info("Data successfully fetched from cache.");
 			return cachedResults;
 		}
 
 		// Query database if not in cache
 		List<StockEntity> dbResults = stockRepository.findTop10ByCountryIgnoreCaseAndExchangeIgnoreCaseAndSymbolStartingWithIgnoreCase(country,exchange,prefix);
-		if (dbResults != null) {
+		if (!dbResults.isEmpty()) {
 			log.info("Data successfully fetched from Database.");
 			// Cache the results for future use
 			stockRedisService.saveToCache(cacheKey,prefix, dbResults);
 			log.info("Data successfully stored into cache.");
 			return dbResults;
 		}
-		return dbResults;
+		throw new RuntimeException("No stocks found for country: " + country + " and exchange: " + exchange+ " and prefix in cache: " + prefix);
 	}
 
 }
