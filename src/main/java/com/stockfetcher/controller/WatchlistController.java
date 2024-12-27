@@ -13,10 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stockfetcher.dto.request.WatchlistRequestDto;
+import com.stockfetcher.dto.response.MetaInfoResponseDto;
 import com.stockfetcher.dto.response.WatchlistResponseDto;
-import com.stockfetcher.dto.response.WatchlistStockResponseDto;
 import com.stockfetcher.model.Watchlist;
-import com.stockfetcher.model.WatchlistStock;
 import com.stockfetcher.service.WatchlistService;
 
 import jakarta.validation.Valid;
@@ -44,12 +43,6 @@ public class WatchlistController {
 		return watchlistService.getWatchlistById(id);
 	}
 
-	// Get All Watchlist
-	@GetMapping(produces = "application/json")
-	public List<WatchlistResponseDto> getAllWatchlist() {
-		return watchlistService.getAllWatchlist();
-	}
-
 	// Get All Watchlists for a User
 	@GetMapping(path = "/user/{userId}", produces = "application/json")
 	public List<Watchlist> getAllWatchlistsForUser(@PathVariable("userId") Long userId) {
@@ -71,25 +64,25 @@ public class WatchlistController {
 
 	// Add stock to a watchlist
 	@PostMapping("/{watchlistId}/stocks")
-	public WatchlistStock addStockToWatchlist(@PathVariable("watchlistId") Long watchlistId,
-			@RequestParam("stockSymbol") String stockSymbol) {
-		return watchlistService.addStockToWatchlist(watchlistId, stockSymbol);
+	public void addStockToWatchlist(@PathVariable("watchlistId") Long watchlistId,
+			@RequestParam("metaInfoId") Long metaInfoId) {
+		watchlistService.addMetaInfoToWatchlist(watchlistId, metaInfoId);
 	}
 
 	// Delete stock from a watchlist
 	@DeleteMapping("/{watchlistId}/stocks/{stockId}")
 	public void deleteStockFromWatchlist(@PathVariable("watchlistId") Long watchlistId,
-			@PathVariable("stockId") Long stockId) {
-		watchlistService.deleteStockFromWatchlist(watchlistId, stockId);
+			@PathVariable("metaInfoId") Long metaInfoId) {
+		watchlistService.removeMetaInfoFromWatchlist(watchlistId, metaInfoId);
 	}
 
 	// Get stocks in a watchlist
 	@GetMapping("/{watchlistId}/stocks")
-	public List<WatchlistStockResponseDto> getStocksInWatchlist(@PathVariable("watchlistId") Long watchlistId,
+	public List<MetaInfoResponseDto> getStocksInWatchlist(@PathVariable("watchlistId") Long watchlistId,
 			@RequestParam(value = "sortField", required = false) String sortField,
 			@RequestParam(value = "sortOrder", required = false, defaultValue = "asc") String sortOrder,
 			@RequestParam(value = "searchQuery", required = false) String searchQuery) {
-		return watchlistService.getStocksInWatchlist(watchlistId, sortField, sortOrder, searchQuery);
+		return watchlistService.getMetaInfosInWatchlist(watchlistId, sortField, sortOrder, searchQuery);
 	}
 
 }

@@ -1,91 +1,94 @@
 package com.stockfetcher.service;
 
+import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stockfetcher.cache.BalanceSheetRedisService;
-import com.stockfetcher.model.BalanceSheetEntity;
+import com.stockfetcher.api.TwelveDataApiClient;
+import com.stockfetcher.cache.GenericRedisService;
+import com.stockfetcher.constants.APIEndpointsConstant;
+import com.stockfetcher.constants.CacheConstant;
+import com.stockfetcher.model.BalanceSheet;
+import com.stockfetcher.model.MetaInfo;
 import com.stockfetcher.repository.BalanceSheetRepository;
 
 @Service
 public class BalanceSheetService {
 
-    private final BalanceSheetRepository repository;
-    private final BalanceSheetRedisService redisService;
-    private final WebClient webClient;
-    private final ObjectMapper objectMapper;
+	@Autowired
+	private BalanceSheetRepository balanceSheetRepository;
 
-	@Value("${twelve.data.api.key}")
-	private String API_KEY;
+	@Autowired
+	private MetaInfoService metaInfoService;
 
-	@Value("${twelve.data.api.url}")
-	private String API_URL;
+	@Autowired
+	private GenericRedisService redisCache;
 
-    public BalanceSheetService(BalanceSheetRepository repository, BalanceSheetRedisService redisService,
-                               WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
-        this.repository = repository;
-        this.redisService = redisService;
-        this.webClient = webClientBuilder.baseUrl("https://api.twelvedata.com").build();
-        this.objectMapper = objectMapper;
-    }
+	@Autowired
+	private TwelveDataApiClient apiClient;
 
-    public List<BalanceSheetEntity> getBySymbol(String symbol) {
-        String cacheKey = redisService.getCacheKeyBySymbol(symbol);
+	public List<BalanceSheet> getBalanceSheet(String symbol, String exchange, String micCode) {
+		String cacheKey = MessageFormat.format(CacheConstant.BALANCE_SHEET_BYSYMBOL_BYEXCHANGE_BYMICCODE, symbol,
+				exchange, micCode);
 
-        // Check Redis Cache
-        List<BalanceSheetEntity> cachedData = redisService.getFromCache(cacheKey);
-        if (cachedData != null) return cachedData;
+		// 1. Check cache
+		List<BalanceSheet> cachedData = redisCache.get(cacheKey, List.class);
+		if (cachedData != null) {
+			return cachedData;
+		}
 
-        // Check Database
-        List<BalanceSheetEntity> dbData = repository.findBySymbol(symbol);
-        if (!dbData.isEmpty()) {
-            redisService.saveToCache(cacheKey, dbData);
-            return dbData;
-        }
+		// 2. Check database
+		List<BalanceSheet> dbData = balanceSheetRepository
+				.findByMetaInfo_SymbolAndMetaInfo_ExchangeAndMetaInfo_MicCode(symbol, exchange, micCode);
+		if (!dbData.isEmpty()) {
+			redisCache.save(cacheKey, dbData, 1440L);
+			return dbData;
+		}
 
-        // Fetch from API
-        return fetchFromApi(symbol, cacheKey);
-    }
+		// 3. Fetch from API
+		List<BalanceSheet> balanceSheets = fetchFromApiAndSave(symbol, exchange, micCode);
 
-    public List<BalanceSheetEntity> getBySymbolAndExchange(String symbol, String exchange) {
-        String cacheKey = redisService.getCacheKeyBySymbolAndExchange(symbol, exchange);
+		if (!balanceSheets.isEmpty()) {
+			redisCache.save(cacheKey, balanceSheets, 1440L);
+			return balanceSheets;
+		}
+		throw new RuntimeException("Error fetching balance sheet data from API.");
+	}
 
-        // Check Redis Cache
-        List<BalanceSheetEntity> cachedData = redisService.getFromCache(cacheKey);
-        if (cachedData != null) return cachedData;
+	private List<BalanceSheet> fetchFromApiAndSave(String symbol, String exchange, String micCode) {
 
-        // Check Database
-        List<BalanceSheetEntity> dbData = repository.findBySymbolAndExchange(symbol, exchange);
-        if (!dbData.isEmpty()) {
-            redisService.saveToCache(cacheKey, dbData);
-            return dbData;
-        }
+		Map<String, String> queryParams = new HashMap<>();
+		queryParams.put("source", "docs");
+		queryParams.put("symbol", symbol);
+		queryParams.put("exchange", exchange);
+		queryParams.put("micCode", micCode);
+		String response = apiClient.fetchData(APIEndpointsConstant.BALANCESHEET, queryParams);
+		MetaInfo metaInfo = metaInfoService.getMetaInfoBySymbolAndExchange(symbol, exchange);
 
-        // Fetch from API
-        return fetchFromApi(symbol, cacheKey);
-    }
+		return parseApiResponse(response, metaInfo);
+	}
 
-    private List<BalanceSheetEntity> fetchFromApi(String symbol, String cacheKey) {
-        // Fetch from API
-        String url = UriComponentsBuilder.fromUriString(API_URL + "/balance_sheet?").queryParam("symbol", symbol)
-				.queryParam("apikey", API_KEY).queryParam("source", "docs").build().toString();
-		String response = webClient.get().uri(url).retrieve().bodyToMono(String.class).block();
-        try {
-            JsonNode rootNode = objectMapper.readTree(response);
-            List<BalanceSheetEntity> entities = objectMapper.convertValue(rootNode.path("balance_sheet"),
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, BalanceSheetEntity.class));
+	private List<BalanceSheet> parseApiResponse(String response, MetaInfo metaInfo) {
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			JsonNode rootNode = objectMapper.readTree(response);
+			JsonNode balanceSheetNodes = rootNode.get("balance_sheet");
 
-            repository.saveAll(entities);
-            redisService.saveToCache(cacheKey, entities);
-            return entities;
-        } catch (Exception e) {
-            throw new RuntimeException("Error fetching data from API", e);
-        }
-    }
+			List<BalanceSheet> balanceSheets = objectMapper.readerForListOf(BalanceSheet.class)
+					.readValue(balanceSheetNodes);
+
+			balanceSheets.forEach(sheet -> sheet.setMetaInfo(metaInfo));
+			balanceSheetRepository.saveAll(balanceSheets);
+			return balanceSheets;
+
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to parse Balance Sheet response", e);
+		}
+	}
 }

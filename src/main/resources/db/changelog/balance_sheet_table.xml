@@ -1,28 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="create-balance-sheet-table" author="developer">
+    <!-- Create balance_sheet table -->
+    <changeSet id="1-balancesheet" author="developer">
+            <!-- Preconditions to ensure the meta_info table exists -->
+
+        <preConditions  onFail="HALT">
+                <tableExists tableName="meta_info" />
+        </preConditions>
+    
         <createTable tableName="balance_sheet">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="symbol" type="VARCHAR(50)" remarks="Stock symbol"/>
-            <column name="name" type="VARCHAR(255)" remarks="Company name"/>
-            <column name="currency" type="VARCHAR(10)" remarks="Currency"/>
-            <column name="exchange" type="VARCHAR(50)" remarks="Stock exchange"/>
-            <column name="mic_code" type="VARCHAR(50)" remarks="Market Identifier Code"/>
-            <column name="exchange_timezone" type="VARCHAR(50)" remarks="Exchange timezone"/>
-            <column name="period" type="VARCHAR(20)" remarks="Report period"/>
-            <column name="fiscal_date" type="DATE" remarks="Fiscal report date"/>
-
-            <!-- Store JSON for assets, liabilities, shareholders equity -->
-            <column name="assets" type="JSON" remarks="Assets details"/>
-            <column name="liabilities" type="JSON" remarks="Liabilities details"/>
-            <column name="shareholders_equity" type="JSON" remarks="Shareholders equity details"/>
+            <column name="meta_info_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="fiscal_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_assets" type="DECIMAL(18,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_liabilities" type="DECIMAL(18,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_shareholders_equity" type="DECIMAL(18,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_assets" type="DECIMAL(18,2)"/>
+            <column name="non_current_assets" type="DECIMAL(18,2)"/>
+            <column name="current_liabilities" type="DECIMAL(18,2)"/>
+            <column name="non_current_liabilities" type="DECIMAL(18,2)"/>
         </createTable>
+
+        <addForeignKeyConstraint
+            constraintName="fk_balance_sheet_to_meta_info"
+            baseTableName="balance_sheet"
+            baseColumnNames="meta_info_id"
+            referencedTableName="meta_info"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+
     </changeSet>
 </databaseChangeLog>

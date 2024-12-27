@@ -3,35 +3,33 @@ package com.stockfetcher.service;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.stockfetcher.dto.request.WatchlistRequestDto;
+import com.stockfetcher.dto.response.MetaInfoResponseDto;
 import com.stockfetcher.dto.response.WatchlistResponseDto;
-import com.stockfetcher.dto.response.WatchlistStockResponseDto;
 import com.stockfetcher.exception.WatchlistAlreadyExistsException;
 import com.stockfetcher.exception.WatchlistLimitExceededException;
+import com.stockfetcher.model.MetaInfo;
 import com.stockfetcher.model.Watchlist;
-import com.stockfetcher.model.WatchlistStock;
+import com.stockfetcher.repository.MetaInfoRepository;
 import com.stockfetcher.repository.WatchlistRepository;
-import com.stockfetcher.repository.WatchlistStockRepository;
 import com.stockfetcher.utils.GenericMapperUtil;
 
 @Service
 public class WatchlistService {
 
 	private final WatchlistRepository watchlistRepository;
-	private final WatchlistStockRepository watchlistStockRepository;
+	private final MetaInfoRepository metaInfoRepository;
 
 	private static final int WATCHLIST_LIMIT = 5;
-	private static final int STOCK_LIMIT = 25; // Limit of stocks in a watchlist
+	private static final int METAINFO_LIMIT = 25; // Limit of MetaInfo in a watchlist
 
-	public WatchlistService(WatchlistRepository watchlistRepository,
-			WatchlistStockRepository watchlistStockRepository) {
+	public WatchlistService(WatchlistRepository watchlistRepository, MetaInfoRepository metaInfoRepository) {
 		this.watchlistRepository = watchlistRepository;
-		this.watchlistStockRepository = watchlistStockRepository;
+		this.metaInfoRepository = metaInfoRepository;
 	}
 
 	// Create Watchlist
@@ -43,30 +41,20 @@ public class WatchlistService {
 		}
 
 		// Check if a watchlist with the same name already exists
-		if (watchlistRepository.existsByName(watchlistRequestDto.getName())) {
+		if (watchlistRepository.existsByNameAndUserId(watchlistRequestDto.getName(), watchlistRequestDto.getUserId())) {
 			throw new WatchlistAlreadyExistsException(
 					"Watchlist already exists with the name: " + watchlistRequestDto.getName());
 		}
 
 		Watchlist watchlist = GenericMapperUtil.convertToEntity(watchlistRequestDto, Watchlist.class);
 		watchlist.setCreatedAt(LocalDateTime.now());
-		Watchlist watchlistresponse = watchlistRepository.save(watchlist);
-		WatchlistResponseDto watchlistResponseDto = GenericMapperUtil.convertToDto(watchlistresponse,
-				WatchlistResponseDto.class);
-		return watchlistResponseDto;
+		Watchlist savedWatchlist = watchlistRepository.save(watchlist);
+		return GenericMapperUtil.convertToDto(savedWatchlist, WatchlistResponseDto.class);
 	}
 
 	// Get Watchlist by ID
 	public Watchlist getWatchlistById(Long id) {
 		return watchlistRepository.findById(id).orElseThrow(() -> new RuntimeException("Watchlist not found"));
-	}
-
-	// Get Watchlist 
-	public List<WatchlistResponseDto> getAllWatchlist() {
-		List<Watchlist> watchlistList = watchlistRepository.findAll();
-		List<WatchlistResponseDto> watchlistResponseDtoList = GenericMapperUtil.convertToDtoList(watchlistList,
-				WatchlistResponseDto.class);
-		return watchlistResponseDtoList;
 	}
 
 	// Get All Watchlists for a User
@@ -76,74 +64,84 @@ public class WatchlistService {
 
 	// Update Watchlist
 	public WatchlistResponseDto updateWatchlist(Long id, WatchlistRequestDto watchlistRequestDto) {
-		if (watchlistRepository.existsByName(watchlistRequestDto.getName())) {
+		Watchlist existingWatchlist = watchlistRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Watchlist not found"));
+
+		if (!existingWatchlist.getName().equalsIgnoreCase(watchlistRequestDto.getName()) && watchlistRepository
+				.existsByNameAndUserId(watchlistRequestDto.getName(), watchlistRequestDto.getUserId())) {
 			throw new WatchlistAlreadyExistsException(
 					"Watchlist already exists with the name: " + watchlistRequestDto.getName());
 		}
-		Optional<Watchlist> watchlistdb = watchlistRepository.findById(id);
-		Watchlist watchlist = GenericMapperUtil.convertToEntity(watchlistRequestDto, Watchlist.class);
-		watchlist.setName(watchlistRequestDto.getName());
-		watchlist.setId(id);
-		watchlist.setCreatedAt(watchlistdb.get().getCreatedAt());
-		watchlist.setUpdatedAt(LocalDateTime.now());
-		Watchlist watchlistresponse = watchlistRepository.save(watchlist);
-		WatchlistResponseDto watchlistResponseDto = GenericMapperUtil.convertToDto(watchlistresponse,
-				WatchlistResponseDto.class);
-		return watchlistResponseDto;
+
+		existingWatchlist.setName(watchlistRequestDto.getName());
+		existingWatchlist.setUpdatedAt(LocalDateTime.now());
+		Watchlist updatedWatchlist = watchlistRepository.save(existingWatchlist);
+		return GenericMapperUtil.convertToDto(updatedWatchlist, WatchlistResponseDto.class);
 	}
 
 	// Delete Watchlist
 	public void deleteWatchlist(Long id) {
+		if (!watchlistRepository.existsById(id)) {
+			throw new RuntimeException("Watchlist not found");
+		}
 		watchlistRepository.deleteById(id);
 	}
 
-	// Add stock to watchlist
-	public WatchlistStock addStockToWatchlist(Long watchlistId, String stockSymbol) {
-		long stockCount = watchlistStockRepository.countByWatchlistId(watchlistId);
-		if (stockCount >= STOCK_LIMIT) {
-			throw new WatchlistLimitExceededException(
-					"Cannot add more than " + STOCK_LIMIT + " stocks to this watchlist.");
-		}
-
+	// Add MetaInfo to Watchlist
+	public void addMetaInfoToWatchlist(Long watchlistId, Long metaInfoId) {
 		Watchlist watchlist = watchlistRepository.findById(watchlistId)
 				.orElseThrow(() -> new RuntimeException("Watchlist not found"));
-		WatchlistStock stock = new WatchlistStock();
-		stock.setStockSymbol(stockSymbol);
-		stock.setAddedAt(LocalDateTime.now());
-		stock.setWatchlist(watchlist);
 
-		return watchlistStockRepository.save(stock);
+		MetaInfo metaInfo = metaInfoRepository.findById(metaInfoId)
+				.orElseThrow(() -> new RuntimeException("MetaInfo not found"));
+
+		// Check for MetaInfo limit in the watchlist
+		if (watchlist.getMetaInfos().size() >= METAINFO_LIMIT) {
+			throw new WatchlistLimitExceededException(
+					"Cannot add more than " + METAINFO_LIMIT + " MetaInfo entries to this watchlist.");
+		}
+
+		watchlist.getMetaInfos().add(metaInfo);
+		watchlistRepository.save(watchlist);
 	}
 
-	// Delete stock from watchlist
-	public void deleteStockFromWatchlist(Long watchlistId, Long stockId) {
-		watchlistStockRepository.deleteById(stockId);
+	// Remove MetaInfo from Watchlist
+	public void removeMetaInfoFromWatchlist(Long watchlistId, Long metaInfoId) {
+		Watchlist watchlist = watchlistRepository.findById(watchlistId)
+				.orElseThrow(() -> new RuntimeException("Watchlist not found"));
+
+		MetaInfo metaInfo = metaInfoRepository.findById(metaInfoId)
+				.orElseThrow(() -> new RuntimeException("MetaInfo not found"));
+
+		watchlist.getMetaInfos().remove(metaInfo);
+		watchlistRepository.save(watchlist);
 	}
 
-	// Get stocks in a watchlist
-	public List<WatchlistStockResponseDto> getStocksInWatchlist(Long watchlistId, String sortField, String sortOrder,
+	// Get MetaInfos in a Watchlist
+	public List<MetaInfoResponseDto> getMetaInfosInWatchlist(Long watchlistId, String sortField, String sortOrder,
 			String searchQuery) {
-		List<WatchlistStock> stocksList = watchlistStockRepository.findByWatchlistId(watchlistId);
-		List<WatchlistStockResponseDto> watchlistStockResponseDtoList = GenericMapperUtil.convertToDtoList(stocksList,
-				WatchlistStockResponseDto.class);
+		Watchlist watchlist = watchlistRepository.findById(watchlistId)
+				.orElseThrow(() -> new RuntimeException("Watchlist not found"));
+
+		List<MetaInfo> metaInfos = watchlist.getMetaInfos().stream().collect(Collectors.toList());
+		List<MetaInfoResponseDto> metaInfoResponseDtoList = GenericMapperUtil.convertToDtoList(metaInfos,
+				MetaInfoResponseDto.class);
 
 		// Filter by search query
 		if (searchQuery != null && !searchQuery.isEmpty()) {
-			watchlistStockResponseDtoList = watchlistStockResponseDtoList.stream()
-					.filter(stock -> stock.getStockSymbol().toLowerCase().contains(searchQuery.toLowerCase()))
+			metaInfoResponseDtoList = metaInfoResponseDtoList.stream()
+					.filter(metaInfo -> metaInfo.getSymbol().toLowerCase().contains(searchQuery.toLowerCase()))
 					.collect(Collectors.toList());
 		}
 
-		// Sort the stocks
-		if ("stockSymbol".equalsIgnoreCase(sortField)) {
-			Comparator<WatchlistStockResponseDto> comparator = Comparator
-					.comparing(WatchlistStockResponseDto::getStockSymbol);
-			watchlistStockResponseDtoList = sortOrder.equalsIgnoreCase("desc")
-					? watchlistStockResponseDtoList.stream().sorted(comparator.reversed()).collect(Collectors.toList())
-					: watchlistStockResponseDtoList.stream().sorted(comparator).collect(Collectors.toList());
+		// Sort the MetaInfos
+		if ("symbol".equalsIgnoreCase(sortField)) {
+			Comparator<MetaInfoResponseDto> comparator = Comparator.comparing(MetaInfoResponseDto::getSymbol);
+			metaInfoResponseDtoList = sortOrder.equalsIgnoreCase("desc")
+					? metaInfoResponseDtoList.stream().sorted(comparator.reversed()).collect(Collectors.toList())
+					: metaInfoResponseDtoList.stream().sorted(comparator).collect(Collectors.toList());
 		}
 
-		return watchlistStockResponseDtoList;
+		return metaInfoResponseDtoList;
 	}
-
 }

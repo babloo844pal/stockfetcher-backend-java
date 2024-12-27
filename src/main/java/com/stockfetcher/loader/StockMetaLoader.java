@@ -27,6 +27,7 @@ public class StockMetaLoader extends BaseLoader {
 	@Override
 	public void loadData() {
 		stockMetaService.getStocksByCountry("India");
+		stockMetaService.getStocksByCountry("United States");
 	}
 
 }

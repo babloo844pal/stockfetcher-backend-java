@@ -39,15 +39,16 @@ public class MetaInfoService {
 		return savedMeta;
 	}
 
-	public MetaInfo getOrCreateMetaInfo(MetaInfo metaInfo) {
-		return metaInfoRepository.findBySymbolAndExchange(metaInfo.getSymbol(), metaInfo.getExchange())
-				.orElseGet(() -> metaInfoRepository.save(metaInfo));
-	}
-	
 	
 	public List<MetaInfo> getMetaInfosByWatchlistId(Long watchlistId) {
         // Fetch MetaInfo based on watchlist (logic depends on DB design)
-        return metaInfoRepository.findByWatchlistId(watchlistId);
+        return metaInfoRepository.findByWatchlistsId(watchlistId);
+    }
+	
+	
+	public MetaInfo getMetaInfoBySymbolAndExchange(String symbol,String exchange) {
+        // Fetch MetaInfo based on watchlist (logic depends on DB design)
+        return metaInfoRepository.findBySymbolAndExchange(symbol,exchange);
     }
 
 }

@@ -20,5 +20,7 @@ public class CacheConstant {
 	
 	public static final String INCOME_DATA_BYSYMBOL_BYEXCHANGE="income_statement_{0}_{1}";
 	
+	public static final String BALANCE_SHEET_BYSYMBOL_BYEXCHANGE_BYMICCODE="balance_sheet_{0}_{1}_{2}";
+	
 	
 }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stockfetcher.model.BalanceSheetEntity;
+import com.stockfetcher.model.BalanceSheet;
 
 import lombok.NoArgsConstructor;
 
@@ -25,7 +25,7 @@ public class BalanceSheetRedisService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void saveToCache(String key, List<BalanceSheetEntity> data) {
+    public void saveToCache(String key, List<BalanceSheet> data) {
         try {
             redisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(data), CACHE_TIMEOUT, TimeUnit.MINUTES);
         } catch (JsonProcessingException e) {
@@ -33,11 +33,11 @@ public class BalanceSheetRedisService {
         }
     }
 
-    public List<BalanceSheetEntity> getFromCache(String key) {
+    public List<BalanceSheet> getFromCache(String key) {
         String json = (String) redisTemplate.opsForValue().get(key);
         if (json != null) {
             try {
-                return List.of(objectMapper.readValue(json, BalanceSheetEntity[].class));
+                return List.of(objectMapper.readValue(json, BalanceSheet[].class));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Error fetching data from Redis", e);
             }

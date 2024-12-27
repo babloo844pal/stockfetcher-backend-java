@@ -1,5 +1,7 @@
 package com.stockfetcher.model;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
@@ -7,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,4 +34,7 @@ public class Country {
 	private String officialName; // Official country name
 	private String capital; // Capital city
 	private String currency; // Currency code
+
+	@ManyToMany(mappedBy = "countries")
+	private Set<MetaInfo> metaInfos;
 }

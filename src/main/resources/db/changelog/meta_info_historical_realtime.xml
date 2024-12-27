@@ -4,13 +4,16 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <!-- Meta Info Table -->
-    <changeSet id="5" author="author">
+    <changeSet id="1-metainfo" author="author">
         <createTable tableName="meta_info">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="symbol" type="VARCHAR(50)">
                 <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="true"/>
             </column>
             <column name="interval_time" type="VARCHAR(10)" defaultValue="1min">
                 <constraints nullable="false"/>
@@ -30,37 +33,12 @@
             <column name="type" type="VARCHAR(50)">
                 <constraints nullable="true"/>
             </column>
-        </createTable>
-    </changeSet>
-    
-     <changeSet author="auther" id="6">
-        <addColumn tableName="meta_info">
-            <column name="period"
-                type="varchar(255)">
-                <constraints nullable="false" />
-            </column>
-        </addColumn>
-    </changeSet>
-   
-    
-    
-        <!-- Add watchlist_stock_id column to meta_info -->
-    <changeSet id="7-add-watchlist-stock-id-to-meta-info" author="developer">
-        <addColumn tableName="meta_info">
-            <column name="watchlist_stock_id" type="BIGINT">
+            <column name="period" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
-        </addColumn>
-
-        <addForeignKeyConstraint
-            constraintName="fk_meta_info_to_watchlist_stocks"
-            baseTableName="meta_info"
-            baseColumnNames="watchlist_stock_id"
-            referencedTableName="watchlist_stocks"
-            referencedColumnNames="id"
-            onDelete="CASCADE"/>
+            <column name="country_id" type="BIGINT"/>
+            <column name="watchlist_stock_id" type="BIGINT"/>
+        </createTable>
     </changeSet>
-    
-    
 
 </databaseChangeLog>

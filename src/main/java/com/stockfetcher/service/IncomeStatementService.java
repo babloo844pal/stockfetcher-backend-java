@@ -44,8 +44,7 @@ public class IncomeStatementService {
 		}
 
 		// Fetch MetaInfo
-		MetaInfo metaInfo = metaInfoRepository.findBySymbolAndExchange(symbol, exchange)
-				.orElseThrow(() -> new RuntimeException("MetaInfo not found for symbol: " + symbol));
+		MetaInfo metaInfo = metaInfoRepository.findBySymbolAndExchange(symbol, exchange);
 
 		// Fetch from DB
 		List<IncomeStatement> dbData = incomeStatementRepository.findByMetaInfo(metaInfo);
@@ -72,7 +71,7 @@ public class IncomeStatementService {
 			queryParams.put("source", "docs");
 			queryParams.put("symbol", symbol);
 			queryParams.put("exchange", exchange);
-			
+
 			String response = apiClient.fetchData("/income_statement", queryParams);
 
 			JsonNode rootNode = new ObjectMapper().readTree(response);

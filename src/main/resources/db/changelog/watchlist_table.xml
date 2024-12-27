@@ -1,58 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <!-- ChangeSet to create watchlist table -->
-    <changeSet id="1-create-watchlist-table" author="developer">
-        <createTable tableName="watchlist">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="user_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="name" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated_at" type="TIMESTAMP">
-                <constraints nullable="true"/>
-            </column>
-        </createTable>
-    </changeSet>
+	<!-- ChangeSet to create watchlist table -->
+	<changeSet id="1-watchlist" author="developer">
+		<createTable tableName="watchlist">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="user_id" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_at" type="TIMESTAMP">
+				<constraints nullable="false" />
+			</column>
+			<column name="updated_at" type="TIMESTAMP">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
 
-    <!-- ChangeSet to create watchlist_stocks table -->
-    <changeSet id="2-create-watchlist-stocks-table" author="developer">
-        <createTable tableName="watchlist_stocks">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="watchlist_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="stock_symbol" type="VARCHAR(50)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="added_at" type="TIMESTAMP">
-                <constraints nullable="true"/>
-            </column>
-        </createTable>
-    </changeSet>
-    
-        <!-- Add foreign key constraint between watchlist_stocks.id and watchlist.id -->
-    <changeSet id="3-add-foreign-key" author="developer">
-        <addForeignKeyConstraint
-            constraintName="fk_watchlist_stocks_to_watchlist"
-            baseTableName="watchlist_stocks"
-            baseColumnNames="watchlist_id"
-            referencedTableName="watchlist"
-            referencedColumnNames="id"
-            onDelete="CASCADE"/>
-    </changeSet>
-    
+
+
+		<createTable tableName="meta_info_watchlists">
+			<column name="meta_info_id" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="watchlist_id" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey
+			columnNames="meta_info_id,watchlist_id"
+			tableName="meta_info_watchlists" />
+	</changeSet>
+
+
 </databaseChangeLog>
