@@ -1,11 +1,14 @@
 package com.stockfetcher.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.stockfetcher.utils.CustomLocalDateTimeDeserializer;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -21,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Table(name = "historical_data")
-public class HistoricalData {
+public class HistoricalData implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +33,10 @@ public class HistoricalData {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "meta_id", nullable = false)
 	private MetaInfo metaInfo;
+	
+	@JsonProperty("interval")
+	@Column(name = "interval_time", nullable = false)
+	private String intervalTime;
 
 	@JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
 	private LocalDateTime datetime;

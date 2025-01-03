@@ -65,15 +65,15 @@ public class WatchlistController {
 	// Add stock to a watchlist
 	@PostMapping("/{watchlistId}/stocks")
 	public void addStockToWatchlist(@PathVariable("watchlistId") Long watchlistId,
-			@RequestParam("metaInfoId") Long metaInfoId) {
-		watchlistService.addMetaInfoToWatchlist(watchlistId, metaInfoId);
+			@RequestParam("stockSymbol") String stockSymbol) {
+		watchlistService.addMetaInfoToWatchlist(watchlistId, stockSymbol);
 	}
 
 	// Delete stock from a watchlist
 	@DeleteMapping("/{watchlistId}/stocks/{stockId}")
 	public void deleteStockFromWatchlist(@PathVariable("watchlistId") Long watchlistId,
-			@PathVariable("metaInfoId") Long metaInfoId) {
-		watchlistService.removeMetaInfoFromWatchlist(watchlistId, metaInfoId);
+			@PathVariable("stockSymbol") String stockSymbol) {
+		watchlistService.removeMetaInfoFromWatchlist(watchlistId, stockSymbol);
 	}
 
 	// Get stocks in a watchlist

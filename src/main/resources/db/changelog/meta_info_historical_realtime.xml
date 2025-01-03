@@ -15,9 +15,6 @@
             <column name="name" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
-            <column name="interval_time" type="VARCHAR(10)" defaultValue="1min">
-                <constraints nullable="false"/>
-            </column>
             <column name="currency" type="VARCHAR(10)">
                 <constraints nullable="true"/>
             </column>
@@ -37,7 +34,6 @@
                 <constraints nullable="true"/>
             </column>
             <column name="country_id" type="BIGINT"/>
-            <column name="watchlist_stock_id" type="BIGINT"/>
         </createTable>
     </changeSet>
 

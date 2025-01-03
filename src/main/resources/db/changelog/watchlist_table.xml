@@ -25,20 +25,18 @@
 			</column>
 		</createTable>
 
-
-
-		<createTable tableName="meta_info_watchlists">
-			<column name="meta_info_id" type="BIGINT">
-				<constraints nullable="false" />
-			</column>
-			<column name="watchlist_id" type="BIGINT">
-				<constraints nullable="false" />
-			</column>
-		</createTable>
-		<addPrimaryKey
-			columnNames="meta_info_id,watchlist_id"
-			tableName="meta_info_watchlists" />
-	</changeSet>
-
-
+    <createTable tableName="watchlist_meta_info">
+        <column name="id" type="BIGINT" autoIncrement="true">
+            <constraints primaryKey="true" nullable="false"/>
+        </column>
+        <column name="watchlist_id" type="BIGINT">
+            <constraints nullable="false"/>
+        </column>
+        <column name="meta_info_id" type="BIGINT">
+            <constraints nullable="false"/>
+        </column>
+    </createTable>
+    <addUniqueConstraint columnNames="watchlist_id,meta_info_id" tableName="watchlist_meta_info"
+                         constraintName="uc_watchlist_meta_info"/>
+</changeSet>
 </databaseChangeLog>

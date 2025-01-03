@@ -1,7 +1,9 @@
 package com.stockfetcher.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
@@ -35,10 +37,6 @@ public class MetaInfo {
 	@Column(name = "name", nullable = true)
 	private String name;
 
-	@JsonProperty("interval")
-	@Column(name = "interval_time", nullable = false)
-	private String intervalTime;
-
 	private String currency;
 
 	@JsonProperty("exchange_timezone")
@@ -59,21 +57,27 @@ public class MetaInfo {
 	@JoinColumn(name = "country_id", nullable = true)
 	private Country country;
 
-    @OneToMany(mappedBy = "metaInfo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<BalanceSheet> balanceSheets;
+	@OneToMany(mappedBy = "metaInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<BalanceSheet> balanceSheets;
 
 	@ManyToMany
 	@JoinTable(name = "meta_info_countries", joinColumns = @JoinColumn(name = "meta_info_id"), inverseJoinColumns = @JoinColumn(name = "country_id"))
 	private Set<Country> countries;
 
-    @ManyToMany
-    @JoinTable(
-        name = "meta_info_watchlists",
-        joinColumns = @JoinColumn(name = "meta_info_id"),
-        inverseJoinColumns = @JoinColumn(name = "watchlist_id")
-    )
-    private Set<Watchlist> watchlists;
-	
-	
+	@OneToMany(mappedBy = "metaInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonBackReference
+	private Set<WatchlistMetaInfo> watchlistMetaInfos = new HashSet<>();
+
+	// Helper methods
+	public void addWatchlist(Watchlist watchlist) {
+		WatchlistMetaInfo watchlistMetaInfo = new WatchlistMetaInfo(watchlist, this);
+		watchlistMetaInfos.add(watchlistMetaInfo);
+		watchlist.getWatchlistMetaInfos().add(watchlistMetaInfo);
+	}
+
+	public void removeWatchlist(Watchlist watchlist) {
+		watchlistMetaInfos.removeIf(watchlistMetaInfo -> watchlistMetaInfo.getWatchlist().equals(watchlist));
+		watchlist.getWatchlistMetaInfos().removeIf(watchlistMetaInfo -> watchlistMetaInfo.getMetaInfo().equals(this));
+	}
 
 }

@@ -1,4 +1,3 @@
-
 package com.stockfetcher.service;
 
 import java.util.List;
@@ -20,6 +19,12 @@ public class MetaInfoService {
 	@Autowired
 	private MetaInfoRedisService redisService;
 
+	/**
+	 * Get MetaInfo from cache or database, or save it if not exists.
+	 *
+	 * @param metaInfo MetaInfo to fetch or save
+	 * @return Fetched or saved MetaInfo
+	 */
 	public MetaInfo getOrSaveMetaInfo(MetaInfo metaInfo) {
 		String cacheKey = redisService.getCacheKey(metaInfo.getSymbol());
 		MetaInfo cachedMeta = redisService.getFromCache(cacheKey);
@@ -39,16 +44,23 @@ public class MetaInfoService {
 		return savedMeta;
 	}
 
-	
+	/**
+	 * Get MetaInfos by Watchlist ID.
+	 *
+	 * @param watchlistId ID of the Watchlist
+	 * @return List of MetaInfo associated with the Watchlist
+	 */
 	public List<MetaInfo> getMetaInfosByWatchlistId(Long watchlistId) {
-        // Fetch MetaInfo based on watchlist (logic depends on DB design)
-        return metaInfoRepository.findByWatchlistsId(watchlistId);
-    }
-	
-	
-	public MetaInfo getMetaInfoBySymbolAndExchange(String symbol,String exchange) {
-        // Fetch MetaInfo based on watchlist (logic depends on DB design)
-        return metaInfoRepository.findBySymbolAndExchange(symbol,exchange);
-    }
+		return metaInfoRepository.findMetaInfosByWatchlistId(watchlistId);
+	}
 
+	/**
+	 * Get MetaInfo by Symbol and Exchange.
+	 *
+	 * @param symbol   MetaInfo symbol
+	 * @param exchange MetaInfo exchange
+	 * @return Fetched MetaInfo
+	 */
+	public MetaInfo getMetaInfoBySymbolAndExchange(String symbol, String exchange) {
+		return metaInfoRepository.findBySymbolAndExchange(symbol, exchange);	}
 }

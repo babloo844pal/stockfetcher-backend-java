@@ -12,6 +12,9 @@
             <column name="meta_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
+            <column name="interval_time" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
             <column name="datetime" type="TIMESTAMP"/>
             <column name="open" type="DECIMAL(15,5)"/>
             <column name="high" type="DECIMAL(15,5)"/>

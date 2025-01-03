@@ -55,7 +55,7 @@ public class HistoricalDataService {
 		// symbol: " + symbol));
 
 		// Fetch from database
-		List<HistoricalData> dbData = historicalDataRepository.findByMetaInfoSymbolAndMetaInfoIntervalTime(symbol,
+		List<HistoricalData> dbData = historicalDataRepository.findByMetaInfoSymbolAndIntervalTime(symbol,
 				interval);
 		if (!dbData.isEmpty()) {
 			redisService.save(cacheKey, dbData, 1440L); // Cache for 1 day
@@ -99,8 +99,7 @@ public class HistoricalDataService {
 	        }
 
 	        // Check if MetaInfo exists in the database
-	        MetaInfo existingMetaInfo = metaInfoRepository.findBySymbolAndIntervalTime(metaInfo.getSymbol(), metaInfo.getIntervalTime())
-	                .orElse(null);
+	        MetaInfo existingMetaInfo = metaInfoRepository.findBySymbolAndExchange(metaInfo.getSymbol(), metaInfo.getExchange());
 
 	        if (existingMetaInfo == null) {
 	            // Persist MetaInfo to the database if not already present
@@ -115,6 +114,7 @@ public class HistoricalDataService {
 	            for (JsonNode value : valuesNode) {
 	                HistoricalData historicalData = objectMapper.readValue(value.toString(), HistoricalData.class);
 	                historicalData.setMetaInfo(metaInfo); // Set persisted MetaInfo in each HistoricalData
+	                historicalData.setIntervalTime(interval);
 	                historicalDataList.add(historicalData);
 	            }
 	        } else {

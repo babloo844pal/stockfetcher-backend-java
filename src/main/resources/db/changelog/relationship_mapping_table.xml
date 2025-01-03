@@ -1,55 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-  <!-- Meta Info Relationships -->
-    <changeSet id="1-relationship" author="author">
+	<!-- Meta Info Relationships -->
+	<changeSet id="1-relationship" author="author">
 
-        <!-- Many-to-One Relationship: Meta Info to Countries -->
-        <addForeignKeyConstraint
-            constraintName="fk_meta_info_to_country"
-            baseTableName="meta_info"
-            baseColumnNames="country_id"
-            referencedTableName="countries"
-            referencedColumnNames="id"
-            onDelete="SET NULL"/>
-            
-       <addForeignKeyConstraint
-            baseTableName="meta_info_watchlists"
-            baseColumnNames="meta_info_id"
-            referencedTableName="meta_info"
-            referencedColumnNames="id"
-            constraintName="fk_meta_info_watchlists_to_meta_info"/>
+		<!-- Many-to-One Relationship: Meta Info to Countries -->
+		<addForeignKeyConstraint
+			constraintName="fk_meta_info_to_country" baseTableName="meta_info"
+			baseColumnNames="country_id" referencedTableName="countries"
+			referencedColumnNames="id" onDelete="SET NULL" />
 
-        <addForeignKeyConstraint
-            baseTableName="meta_info_watchlists"
-            baseColumnNames="watchlist_id"
-            referencedTableName="watchlist"
-            referencedColumnNames="id"
-            constraintName="fk_meta_info_watchlists_to_watchlist"/>
-    </changeSet>
-    
-    
-    <!-- Linking Meta Info and Countries (Many-to-Many) -->
-    <changeSet id="2-relationship" author="author">
-        <addForeignKeyConstraint
-            constraintName="fk_meta_info_countries_meta_info"
-            baseTableName="meta_info_countries"
-            baseColumnNames="meta_info_id"
-            referencedTableName="meta_info"
-            referencedColumnNames="id"
-            onDelete="CASCADE"/>
+		<addForeignKeyConstraint
+			baseTableName="watchlist_meta_info" baseColumnNames="watchlist_id"
+			referencedTableName="watchlist" referencedColumnNames="id"
+			constraintName="fk_watchlist_meta_info_to_watchlist" />
 
-        <addForeignKeyConstraint
-            constraintName="fk_meta_info_countries_country"
-            baseTableName="meta_info_countries"
-            baseColumnNames="country_id"
-            referencedTableName="countries"
-            referencedColumnNames="id"
-            onDelete="CASCADE"/>
-    </changeSet>
-    
-    </databaseChangeLog>
+		<addForeignKeyConstraint
+			baseTableName="watchlist_meta_info" baseColumnNames="meta_info_id"
+			referencedTableName="meta_info" referencedColumnNames="id"
+			constraintName="fk_watchlist_meta_info_to_meta_info" />
+	</changeSet>
+
+
+	<!-- Linking Meta Info and Countries (Many-to-Many) -->
+	<changeSet id="2-relationship" author="author">
+		<addForeignKeyConstraint
+			constraintName="fk_meta_info_countries_meta_info"
+			baseTableName="meta_info_countries" baseColumnNames="meta_info_id"
+			referencedTableName="meta_info" referencedColumnNames="id"
+			onDelete="CASCADE" />
+
+		<addForeignKeyConstraint
+			constraintName="fk_meta_info_countries_country"
+			baseTableName="meta_info_countries" baseColumnNames="country_id"
+			referencedTableName="countries" referencedColumnNames="id"
+			onDelete="CASCADE" />
+	</changeSet>
+
+</databaseChangeLog>

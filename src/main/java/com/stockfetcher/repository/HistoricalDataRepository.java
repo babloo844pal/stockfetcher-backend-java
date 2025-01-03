@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface HistoricalDataRepository extends JpaRepository<HistoricalData, Long> {
-    List<HistoricalData> findByMetaInfoSymbolAndMetaInfoIntervalTime(String symbol, String interval);
+    List<HistoricalData> findByMetaInfoSymbolAndIntervalTime(String symbol, String interval);
 }
