@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.stockfetcher.dto.request.WatchlistRequestDto;
@@ -19,13 +20,14 @@ import com.stockfetcher.repository.MetaInfoRepository;
 import com.stockfetcher.repository.WatchlistRepository;
 import com.stockfetcher.utils.GenericMapperUtil;
 
-import jakarta.transaction.Transactional;
-
 @Service
 public class WatchlistService {
 
 	private final WatchlistRepository watchlistRepository;
 	private final MetaInfoRepository metaInfoRepository;
+
+	@Autowired
+	private WatchlistMetaInfoService watchlistMetaInfoService;
 
 	private static final int WATCHLIST_LIMIT = 5;
 	private static final int METAINFO_LIMIT = 25; // Limit of MetaInfo in a watchlist
@@ -90,45 +92,42 @@ public class WatchlistService {
 		watchlistRepository.deleteById(id);
 	}
 
-	@Transactional
-	public void addMetaInfoToWatchlist(Long watchlistId, String symbol) {
-		Watchlist watchlist = watchlistRepository.findById(watchlistId)
-				.orElseThrow(() -> new RuntimeException("Watchlist not found"));
+	/*
+	 * @Transactional public void addMetaInfoToWatchlist(Long watchlistId, String
+	 * symbol) { Watchlist watchlist = watchlistRepository.findById(watchlistId)
+	 * .orElseThrow(() -> new RuntimeException("Watchlist not found"));
+	 * 
+	 * MetaInfo metaInfo = metaInfoRepository.findBySymbol(symbol) .orElseThrow(()
+	 * -> new RuntimeException("MetaInfo not found"));
+	 * 
+	 * // Check if the relationship already exists boolean alreadyExists =
+	 * watchlist.getWatchlistMetaInfos().stream() .anyMatch(watchlistMetaInfo ->
+	 * watchlistMetaInfo.getMetaInfo().equals(metaInfo));
+	 * 
+	 * if (alreadyExists) { throw new
+	 * RuntimeException("This MetaInfo is already associated with the Watchlist.");
+	 * }
+	 * 
+	 * // Add MetaInfo to Watchlist watchlist.addMetaInfo(metaInfo);
+	 * 
+	 * System.out.println(" watchlist: " + watchlist);
+	 * 
+	 * // Save owning side watchlistRepository.save(watchlist); }
+	 */
 
-		MetaInfo metaInfo = metaInfoRepository.findBySymbol(symbol)
-				.orElseThrow(() -> new RuntimeException("MetaInfo not found"));
-
-		// Check if the relationship already exists
-		boolean alreadyExists = watchlist.getWatchlistMetaInfos().stream()
-				.anyMatch(watchlistMetaInfo -> watchlistMetaInfo.getMetaInfo().equals(metaInfo));
-
-		if (alreadyExists) {
-			throw new RuntimeException("This MetaInfo is already associated with the Watchlist.");
-		}
-
-		// Add MetaInfo to Watchlist
-		watchlist.addMetaInfo(metaInfo);
-		
-		 System.out.println(" watchlist: " + watchlist);
-
-		// Save owning side
-		watchlistRepository.save(watchlist);
-	}
-
-	@Transactional
-	public void removeMetaInfoFromWatchlist(Long watchlistId, String symbol) {
-		Watchlist watchlist = watchlistRepository.findById(watchlistId)
-				.orElseThrow(() -> new RuntimeException("Watchlist not found"));
-
-		MetaInfo metaInfo = metaInfoRepository.findBySymbol(symbol)
-				.orElseThrow(() -> new RuntimeException("MetaInfo not found"));
-
-		// Remove MetaInfo from Watchlist
-		watchlist.removeMetaInfo(metaInfo);
-
-		// Save owning side
-		watchlistRepository.save(watchlist);
-	}
+	/*
+	 * @Transactional public void removeMetaInfoFromWatchlist(Long watchlistId,
+	 * String symbol) { Watchlist watchlist =
+	 * watchlistRepository.findById(watchlistId) .orElseThrow(() -> new
+	 * RuntimeException("Watchlist not found"));
+	 * 
+	 * MetaInfo metaInfo = metaInfoRepository.findBySymbol(symbol) .orElseThrow(()
+	 * -> new RuntimeException("MetaInfo not found"));
+	 * 
+	 * // Remove MetaInfo from Watchlist watchlist.removeMetaInfo(metaInfo);
+	 * 
+	 * // Save owning side watchlistRepository.save(watchlist); }
+	 */
 
 	// Get MetaInfos in a Watchlist
 	public List<MetaInfoResponseDto> getMetaInfosInWatchlist(Long watchlistId, String sortField, String sortOrder,
@@ -138,12 +137,15 @@ public class WatchlistService {
 				.orElseThrow(() -> new RuntimeException("Watchlist not found"));
 
 		// Extract MetaInfos from the join entity (WatchlistMetaInfo)
-		List<MetaInfo> metaInfos = watchlist.getWatchlistMetaInfos().stream().map(WatchlistMetaInfo::getMetaInfo)
-				.collect(Collectors.toList());
+		List<WatchlistMetaInfo> relations = watchlistMetaInfoService.getRelationsByWatchlistId(watchlistId);
+		List<MetaInfoResponseDto> metaInfoResponseDtoList=relations.stream().map(relation -> MetaInfoResponseDto.fromEntity(relation.getMetaInfo())).toList();
+		
+		//List<MetaInfo> metaInfos = watchlist.getWatchlistMetaInfos().stream().map(WatchlistMetaInfo::getMetaInfo)
+		//		.collect(Collectors.toList());
 
 		// Convert the list of MetaInfo entities to DTOs
-		List<MetaInfoResponseDto> metaInfoResponseDtoList = GenericMapperUtil.convertToDtoList(metaInfos,
-				MetaInfoResponseDto.class);
+		//List<MetaInfoResponseDto> metaInfoResponseDtoList = GenericMapperUtil.convertToDtoList(metaInfos,
+		//		MetaInfoResponseDto.class);
 
 		// Filter by search query
 		if (searchQuery != null && !searchQuery.isEmpty()) {
@@ -162,4 +164,19 @@ public class WatchlistService {
 
 		return metaInfoResponseDtoList;
 	}
+
+	/**
+	 * Add MetaInfo to a Watchlist.
+	 */
+	public void addMetaInfoToWatchlist(Long watchlistId, String symbol) {
+		watchlistMetaInfoService.saveRelation(watchlistId, symbol);
+	}
+
+	/**
+	 * Remove MetaInfo from a Watchlist.
+	 */
+	public void removeMetaInfoFromWatchlist(Long watchlistId, Long metaInfoId) {
+		watchlistMetaInfoService.deleteRelation(watchlistId, metaInfoId);
+	}
+
 }

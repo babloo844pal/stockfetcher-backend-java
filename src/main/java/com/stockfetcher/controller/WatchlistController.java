@@ -2,6 +2,7 @@ package com.stockfetcher.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,16 +65,21 @@ public class WatchlistController {
 
 	// Add stock to a watchlist
 	@PostMapping("/{watchlistId}/stocks")
-	public void addStockToWatchlist(@PathVariable("watchlistId") Long watchlistId,
+	public ResponseEntity<String> addStockToWatchlist(@PathVariable("watchlistId") Long watchlistId,
 			@RequestParam("stockSymbol") String stockSymbol) {
+		// watchlistService.addMetaInfoToWatchlist(watchlistId, stockSymbol);
 		watchlistService.addMetaInfoToWatchlist(watchlistId, stockSymbol);
+		return ResponseEntity.ok("MetaInfo added to Watchlist successfully.");
 	}
 
 	// Delete stock from a watchlist
-	@DeleteMapping("/{watchlistId}/stocks/{stockId}")
-	public void deleteStockFromWatchlist(@PathVariable("watchlistId") Long watchlistId,
-			@PathVariable("stockSymbol") String stockSymbol) {
-		watchlistService.removeMetaInfoFromWatchlist(watchlistId, stockSymbol);
+	@DeleteMapping("/{watchlistId}/stocks/{metaInfoId}")
+	public ResponseEntity<String> deleteStockFromWatchlist(@PathVariable("watchlistId") Long watchlistId,
+			@PathVariable("metaInfoId") Long metaInfoId) {
+		// watchlistService.removeMetaInfoFromWatchlist(watchlistId, stockSymbol);
+
+        watchlistService.removeMetaInfoFromWatchlist(watchlistId, metaInfoId);
+        return ResponseEntity.ok("MetaInfo removed from Watchlist successfully.");
 	}
 
 	// Get stocks in a watchlist
